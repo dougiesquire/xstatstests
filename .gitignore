@@ -1,0 +1,56 @@
+# Specific local files8
+/python_charmers/Data
+/python_charmers/Notebooks
+
+# dask lock files
+**.dirlock
+**.lock
+
+# python and jupyter notebook files
+.ipynb_checkpoints
+__pycache__
+**.egg-info
+.eggs
+__pycache__
+.pytest_cache
+**.pyc
+
+# Mac stuff
+._*
+
+# Standard error output files
+**.err
+
+# excel files
+**.xlsx
+**.xl
+
+# nc files
+**.nc
+
+# figures
+**.png
+**.jpg
+**.eps
+**.pdf
+
+# compressed files
+**.zip
+**.tar
+
+# mac files
+.DS_Store
+
+# Backup files
+**.bak
+
+# Compiled Static libraries
+**.lai
+**.la
+**.a
+**.lib
+
+# Executables
+**.exe
+**.out
+**.app

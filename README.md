@@ -1,2 +1,3 @@
 # xks
-Xarray-compatible Kolmogorov-Smirnov testing
+
+xarray-compatible Kolmogorov-Smirnov testing
