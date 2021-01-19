@@ -37,7 +37,7 @@ def _quadct(x, y, xx, yy):
     return a, b, c, d
 
 
-def ks2d2s(x1, y1, x2, y2):
+def ks2d2s_np(x1, y1, x2, y2):
     """Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only the KS statistic.
         Parameters
         ----------
@@ -72,7 +72,7 @@ def ks2d2s(x1, y1, x2, y2):
     return (D1 + D2) / 2
 
 
-def ks2d2s_xr(ds1, ds2, sample_dim):
+def ks2d2s(ds1, ds2, sample_dim):
     """xarray version of two-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
         ds# should contain two variables corresponding to each dimension. For now, returns only the KS 
         statistic with the expectation that confidence is assigned via resampling.
@@ -106,7 +106,7 @@ def ks2d2s_xr(ds1, ds2, sample_dim):
     ds2_vars = list(ds2.data_vars)
     assert len(ds1_vars) == 2
     assert ds1_vars == ds2_vars
-    return xr.apply_ufunc(ks2d2s, 
+    return xr.apply_ufunc(ks2d2s_np, 
                           ds1[ds1_vars[0]], ds1[ds1_vars[1]], 
                           ds2[ds1_vars[0]], ds2[ds1_vars[1]],
                           input_core_dims=[[sample_dim],[sample_dim],[sample_dim],[sample_dim]])
