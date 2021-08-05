@@ -12,7 +12,7 @@ def _maxdist(x1, y1, x2, y2):
                                  x1, y1)
         a2, b2, c2, d2 = _quadct(np.expand_dims(x1[...,i], axis=-1), np.expand_dims(y1[...,i], axis=-1), 
                                  x2, y2)
-        D[...,:,i] = np.array([a1 - a2, b1 - b2, c1 - c2, d1 - d2]).T # differences in each quadrant
+        D[...,:,i] = np.stack((a1 - a2, b1 - b2, c1 - c2, d1 - d2), axis=-1) # differences in each quadrant
 
     # re-assign the point to maximize difference,
     # the discrepancy is significant for N < ~50
