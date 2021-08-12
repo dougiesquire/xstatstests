@@ -40,10 +40,18 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
     ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
     ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
     ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
-    ds1_vars = list(ds1.data_vars)
-    ds2_vars = list(ds2.data_vars)
-    assert len(ds1_vars) == 1
-    assert ds1_vars == ds2_vars
+    
+    if isinstance(ds1, xr.Dataset):
+        # Assume both are Datasets
+        ds1_vars = list(ds1.data_vars)
+        ds2_vars = list(ds2.data_vars)
+        assert ds1_vars == ds2_vars
+    elif isinstance(ds1, xr.DataArray):
+        # Assume both are DataArrays
+        if (ds1.name is not None) & (ds2.name is not None):
+            assert ds1.name == ds2.name
+    else:
+        raise InputError('Input arrays must be xarray DataArrays or Datasets')
     
     # Need to rename sample dim otherwise apply_ufunc tries to align
     ds1 = ds1.rename({sample_dim: 's1'})
@@ -181,10 +189,15 @@ def ks2d2s(ds1, ds2, sample_dim):
     ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
     ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
     ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
-    ds1_vars = list(ds1.data_vars)
-    ds2_vars = list(ds2.data_vars)
-    assert len(ds1_vars) == 2
-    assert ds1_vars == ds2_vars
+    
+    if isinstance(ds1, xr.Dataset):
+        # Assume both are Datasets
+        ds1_vars = list(ds1.data_vars)
+        ds2_vars = list(ds2.data_vars)
+        assert len(ds1_vars) == 2
+        assert ds1_vars == ds2_vars
+    else:
+        raise InputError('Input arrays must be xarray Datasets')
     
     # Need to rename sample dim otherwise apply_ufunc tries to align
     ds1 = ds1.rename({sample_dim: 's1'})
