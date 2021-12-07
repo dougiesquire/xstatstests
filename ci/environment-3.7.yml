@@ -6,6 +6,7 @@ dependencies:
   - xarray
   - scipy
   - numpy
+  - dask-core
   - pytest
   - pip
   - pip:
