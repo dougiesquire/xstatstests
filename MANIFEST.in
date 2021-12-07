@@ -1,0 +1,5 @@
+include LICENSE
+graft xks
+recursive-exclude * *.py[co]
+include versioneer.py
+include xks/_version.py
