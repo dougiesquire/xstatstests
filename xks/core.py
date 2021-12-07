@@ -90,50 +90,6 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
 
 # 2-dimensional tests
 # -------------------
-def _maxdist(x1, y1, x2, y2):
-    """Return the max distance ranging over data points and quadrants of the integrated probabilities"""
-    n1 = x1.shape[-1]
-    D = np.empty((*x1.shape[:-1], 4, x1.shape[-1]))
-    for i in range(n1):
-        a1, b1, c1, d1 = _quadct(
-            np.expand_dims(x1[..., i], axis=-1),
-            np.expand_dims(y1[..., i], axis=-1),
-            x1,
-            y1,
-        )
-        a2, b2, c2, d2 = _quadct(
-            np.expand_dims(x1[..., i], axis=-1),
-            np.expand_dims(y1[..., i], axis=-1),
-            x2,
-            y2,
-        )
-        D[..., :, i] = np.stack(
-            [a1 - a2, b1 - b2, c1 - c2, d1 - d2], axis=-1
-        )  # differences in each quadrant
-
-    # re-assign the point to maximize difference,
-    # the discrepancy is significant for N < ~50
-    #     D[:, 0] -= 1 / n1
-    #     dmin, dmax = -D.min(), D.max() + 1 / n1
-    #     return max(dmin, dmax)
-
-    return np.max(abs(D), axis=(-2, -1))  # Find max over all points and quadrants
-
-
-def _quadct(x, y, xx, yy):
-    """Given an origin (x,y) and an array of NN points with coordinates XX and YY, count how may of them
-    are in each quadrant around the origin, and return the normalised fractions.
-    """
-    n = xx.shape[-1]
-    ix1, ix2 = xx > x, yy > y
-    a = np.sum(ix1 & ix2, axis=-1) / n
-    b = np.sum(~ix1 & ix2, axis=-1) / n
-    c = np.sum(~ix1 & ~ix2, axis=-1) / n
-    d = np.sum(ix1 & ~ix2, axis=-1) / n
-    np.testing.assert_almost_equal(1, a + b + c + d)
-    return a, b, c, d
-
-
 def ks2d2s_np(x1, y1, x2, y2):
     """Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only the KS statistic.
     Parameters
@@ -156,6 +112,49 @@ def ks2d2s_np(x1, y1, x2, y2):
     Fasano, G. and Franceschini, A. 1987, A Multidimensional Version of the Kolmogorov-Smirnov
         Test, Monthly Notices of the Royal Astronomical Society, vol. 225, pp. 155-170
     """
+
+    def _quadct(x, y, xx, yy):
+        """Given an origin (x,y) and an array of NN points with coordinates XX and YY, count how may of them
+        are in each quadrant around the origin, and return the normalised fractions.
+        """
+        n = xx.shape[-1]
+        ix1, ix2 = xx > x, yy > y
+        a = np.sum(ix1 & ix2, axis=-1) / n
+        b = np.sum(~ix1 & ix2, axis=-1) / n
+        c = np.sum(~ix1 & ~ix2, axis=-1) / n
+        d = np.sum(ix1 & ~ix2, axis=-1) / n
+        np.testing.assert_almost_equal(1, a + b + c + d)
+        return a, b, c, d
+
+    def _maxdist(x1, y1, x2, y2):
+        """Return the max distance ranging over data points and quadrants of the integrated probabilities"""
+        n1 = x1.shape[-1]
+        D = np.empty((*x1.shape[:-1], 4, x1.shape[-1]))
+        for i in range(n1):
+            a1, b1, c1, d1 = _quadct(
+                np.expand_dims(x1[..., i], axis=-1),
+                np.expand_dims(y1[..., i], axis=-1),
+                x1,
+                y1,
+            )
+            a2, b2, c2, d2 = _quadct(
+                np.expand_dims(x1[..., i], axis=-1),
+                np.expand_dims(y1[..., i], axis=-1),
+                x2,
+                y2,
+            )
+            D[..., :, i] = np.stack(
+                [a1 - a2, b1 - b2, c1 - c2, d1 - d2], axis=-1
+            )  # differences in each quadrant
+
+        # re-assign the point to maximize difference,
+        # the discrepancy is significant for N < ~50
+        #     D[:, 0] -= 1 / n1
+        #     dmin, dmax = -D.min(), D.max() + 1 / n1
+        #     return max(dmin, dmax)
+
+        return np.max(abs(D), axis=(-2, -1))  # Find max over all points and quadrants
+
     # Remove any nans along the sample dimension that were added by broadcasting sample_1 and sample_2
     x1 = x1[
         ..., ~np.apply_over_axes(np.all, np.isnan(x1), range(x1.ndim - 1)).squeeze()
