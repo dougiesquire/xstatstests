@@ -1,7 +1,8 @@
 import numpy as np
 import xarray as xr
 from scipy.stats import ks_2samp
-from numba import float64, guvectorize
+
+# from numba import float64, guvectorize
 
 from .exceptions import InputError
 
@@ -59,16 +60,16 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
     ds1 = ds1.rename({sample_dim: "s1"})
     ds2 = ds2.rename({sample_dim: "s2"})
 
-    @guvectorize(
-        [(float64[:], float64[:], float64[:], float64[:])], "(n), (m) -> (), ()"
-    )
-    def _wrap_ks_2samp(data1, data2, D, p):
-        # def _wrap_ks_2samp(data1, data2):
+    # @guvectorize(
+    #     [(float64[:], float64[:], float64[:], float64[:])], "(n), (m) -> (), ()", nopython=False,
+    # )
+    # def _wrap_ks_2samp(data1, data2, D, p):
+    def _wrap_ks_2samp(data1, data2):
         # Remove nans because they get dealt with erroneously in ks_2samp
         data1 = data1[~np.isnan(data1)]
         data2 = data2[~np.isnan(data2)]
-        D[:], p[:] = ks_2samp(data1, data2)
-        # return ks_2samp(data1, data2)
+        # D[:], p[:] = ks_2samp(data1, data2)
+        return ks_2samp(data1, data2)
 
     return xr.apply_ufunc(
         _wrap_ks_2samp,
@@ -83,7 +84,7 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
             [],
             [],
         ],
-        # vectorize=True,
+        vectorize=True,
         dask="parallelized"
     )
 
