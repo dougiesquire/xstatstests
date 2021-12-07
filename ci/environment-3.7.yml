@@ -6,7 +6,6 @@ dependencies:
   - xarray
   - scipy
   - numpy
-  - numba
   - pytest
   - pip
   - pip:

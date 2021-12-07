@@ -20,6 +20,5 @@ setup(
     install_requires=[
         "xarray",
         "scipy",
-        "numba",
     ],
 )
