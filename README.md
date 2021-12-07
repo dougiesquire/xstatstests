@@ -1,8 +1,12 @@
-# xks
+## xks
+
+[![tests](https://github.com/dougiesquire/xks/actions/workflows/tests.yml/badge.svg)](https://github.com/dougiesquire/xks/actions/workflows/tests.yml)
+[![pre-commit](https://github.com/dougiesquire/xks/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dougiesquire/xks/actions/workflows/pre-commit.yml)
+[![codecov](https://codecov.io/gh/dougiesquire/xks/branch/main/graph/badge.svg?token=DBGC0FIRLA)](https://codecov.io/gh/dougiesquire/xks)
 
 xarray-compatible Kolmogorov-Smirnov testing in 1D and 2D
 
-## References
+### References
 
 Press, W.H. et al. 2007, Numerical Recipes, section 14.8
 
