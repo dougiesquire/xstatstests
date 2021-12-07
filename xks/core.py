@@ -2,8 +2,6 @@ import numpy as np
 import xarray as xr
 from scipy.stats import ks_2samp
 
-from .exceptions import InputError
-
 
 # 1-dimensional tests
 # -------------------
@@ -38,21 +36,21 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
     Hodges, J.L. Jr., “The Significance Probability of the Smirnov Two-Sample Test,”
         Arkiv fiur Matematik, 3, No. 43 (1958), 469-86.
     """
-    ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
-    ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
-    ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
-
-    if isinstance(ds1, xr.Dataset):
-        # Assume both are Datasets
+    if isinstance(ds1, xr.Dataset) & isinstance(ds2, xr.Dataset):
         ds1_vars = list(ds1.data_vars)
         ds2_vars = list(ds2.data_vars)
         assert ds1_vars == ds2_vars
-    elif isinstance(ds1, xr.DataArray):
-        # Assume both are DataArrays
+    elif isinstance(ds1, xr.DataArray) & isinstance(ds2, xr.DataArray):
         if (ds1.name is not None) & (ds2.name is not None):
-            assert ds1.name == ds2.name
+            assert (
+                ds1.name == ds2.name
+            ), "When named DataArrays are supplied, they must have the same name"
     else:
-        raise InputError("Input arrays must be xarray DataArrays or Datasets")
+        raise TypeError("Input arrays must be xarray Datasets or DataArrays")
+
+    ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
+    ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
+    ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
 
     # Need to rename sample dim otherwise apply_ufunc tries to align
     ds1 = ds1.rename({sample_dim: "s1"})
@@ -197,18 +195,17 @@ def ks2d2s(ds1, ds2, sample_dim):
     Fasano, G. and Franceschini, A. 1987, A Multidimensional Version of the Kolmogorov-Smirnov
         Test, Monthly Notices of the Royal Astronomical Society, vol. 225, pp. 155-170
     """
+    if (not isinstance(ds1, xr.Dataset)) | (not isinstance(ds2, xr.Dataset)):
+        raise TypeError("Input arrays must be xarray Datasets with 2 variables each")
+
     ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
     ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
     ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
 
-    if isinstance(ds1, xr.Dataset):
-        # Assume both are Datasets
-        ds1_vars = list(ds1.data_vars)
-        ds2_vars = list(ds2.data_vars)
-        assert len(ds1_vars) == 2
-        assert ds1_vars == ds2_vars
-    else:
-        raise InputError("Input arrays must be xarray Datasets")  # noqa: F821
+    ds1_vars = list(ds1.data_vars)
+    ds2_vars = list(ds2.data_vars)
+    assert len(ds1_vars) == 2
+    assert ds1_vars == ds2_vars
 
     # Need to rename sample dim otherwise apply_ufunc tries to align
     ds1 = ds1.rename({sample_dim: "s1"})
