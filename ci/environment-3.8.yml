@@ -1,0 +1,14 @@
+name: xks-test
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - xarray
+  - scipy
+  - numpy
+  - numba
+  - pytest
+  - pip
+  - pip:
+    - codecov
+    - pytest-cov
