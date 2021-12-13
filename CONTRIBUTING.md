@@ -21,6 +21,12 @@ $ conda env create -f environment.yml
 $ conda activate xks
 ```
 
+Aside: it is handy to install your conda environment as an ipykernel. This makes a kernel running the `xks` environment available from within Jupyter and you won't have to restart Jupyter to effectuate any changes/updates you make to the environment (simply restarting the kernel will do):
+
+```
+python -m ipykernel install --user --name xks --display-name "Python (xks)"
+```
+
 4. Install `xks` using the editable flag (meaning any changes you make to the package will be reflected directly in your environment):
 
 ```
