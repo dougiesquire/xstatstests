@@ -2,13 +2,13 @@ from setuptools import find_packages, setup
 import versioneer
 
 setup(
-    name="xks",
+    name="xsampletests",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Dougie Squire",
-    url="https://github.com/dougiesquire/xks",
-    description="A Python library for xarray-compatible Kolmogorov-Smirnov testing",
-    long_description="A Python library for xarray-compatible Kolmogorov-Smirnov testing in multiple dimensions",
+    url="https://github.com/dougiesquire/xsampletests",
+    description="Sample testing for xarray objects",
+    long_description="Sample testing for xarray objects",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

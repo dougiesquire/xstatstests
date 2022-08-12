@@ -1,5 +1,5 @@
 include LICENSE
-graft xks
+graft xsampletests
 recursive-exclude * *.py[co]
 include versioneer.py
-include xks/_version.py
+include xsampletests/_version.py

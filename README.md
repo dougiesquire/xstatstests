@@ -1,12 +1,22 @@
-## xks
+## xsampletests
 
-[![tests](https://github.com/dougiesquire/xks/actions/workflows/tests.yml/badge.svg)](https://github.com/dougiesquire/xks/actions/workflows/tests.yml)
-[![pre-commit](https://github.com/dougiesquire/xks/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dougiesquire/xks/actions/workflows/pre-commit.yml)
-[![codecov](https://codecov.io/gh/dougiesquire/xks/branch/main/graph/badge.svg?token=DBGC0FIRLA)](https://codecov.io/gh/dougiesquire/xks)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/dougiesquire/xks/blob/master/LICENSE)
+[![tests](https://github.com/dougiesquire/xsampletests/actions/workflows/tests.yml/badge.svg)](https://github.com/dougiesquire/xsampletests/actions/workflows/tests.yml)
+[![pre-commit](https://github.com/dougiesquire/xsampletests/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dougiesquire/xsampletests/actions/workflows/pre-commit.yml)
+[![codecov](https://codecov.io/gh/dougiesquire/xsampletests/branch/main/graph/badge.svg?token=DBGC0FIRLA)](https://codecov.io/gh/dougiesquire/xsampletests)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/dougiesquire/xsampletests/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
-xarray-compatible Kolmogorov-Smirnov testing in 1D and 2D
+Sample testing for xarray objects. Currently includes the following distribution tests:
+- One-dimensional Kolmogorov-Smirnov test on two samples
+- Two-dimensional Kolmogorov-Smirnov test on two samples
+- Anderson-Darling test on N samples
+This package was originally called `xks` but was renamed when tests other that the KS test were added.
+
+### Installation
+To install this package from PyPI:
+```
+#TODO
+```
 
 ### References
 

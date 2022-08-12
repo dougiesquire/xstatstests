@@ -1,4 +1,4 @@
-name: xks-test
+name: xsampletests-test
 channels:
   - conda-forge
 dependencies:

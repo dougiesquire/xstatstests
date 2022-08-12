@@ -5,7 +5,7 @@ import numpy.testing as npt
 
 import xarray as xr
 
-from xks import ks1d2s, ks2d2s
+from xsampletests import ks1d2s, ks2d2s
 from .fixtures import ds_1var
 from scipy.stats import ks_2samp
 
