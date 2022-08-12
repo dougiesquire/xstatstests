@@ -5,7 +5,7 @@ from scipy.stats import ks_2samp
 
 # 1-dimensional tests
 # -------------------
-def ks1d2s(ds1, ds2, sample_dim, **kwargs):
+def ks_1d_2samp(ds1, ds2, sample_dim, **kwargs):
     """xarray version of one-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
     ds# should each contain one variable.
 
@@ -82,7 +82,7 @@ def ks1d2s(ds1, ds2, sample_dim, **kwargs):
 
 # 2-dimensional tests
 # -------------------
-def ks2d2s_np(x1, y1, x2, y2):
+def ks_2d_2samp_np(x1, y1, x2, y2):
     """Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only the KS statistic.
     Parameters
     ----------
@@ -168,7 +168,7 @@ def ks2d2s_np(x1, y1, x2, y2):
     return (D1 + D2) / 2
 
 
-def ks2d2s(ds1, ds2, sample_dim):
+def ks_2d_2samp(ds1, ds2, sample_dim):
     """xarray version of two-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
     ds# should contain two variables corresponding to each dimension. For now, returns only the KS
     statistic with the expectation that confidence is assigned via resampling.
@@ -212,7 +212,7 @@ def ks2d2s(ds1, ds2, sample_dim):
     ds2 = ds2.rename({sample_dim: "s2"})
 
     return xr.apply_ufunc(
-        ks2d2s_np,
+        ks_2d_2samp_np,
         ds1[ds1_vars[0]],
         ds1[ds1_vars[1]],
         ds2[ds1_vars[0]],

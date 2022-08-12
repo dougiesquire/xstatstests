@@ -7,11 +7,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
 Sample testing for xarray objects. Currently includes the following distribution tests:
-- One-dimensional Kolmogorov-Smirnov test on two samples
-- Two-dimensional Kolmogorov-Smirnov test on two samples
-- Anderson-Darling test on N samples
+- `xsampletests.ks_1d_2samp`: one-dimensional Kolmogorov-Smirnov test on two samples
+- `xsampletests.ks_2d_2samp`: two-dimensional Kolmogorov-Smirnov test on two samples
+- `#TODO`: Anderson-Darling test on N samples
 
-This package was originally called `xks` but was renamed when tests other that the KS test were added.
+This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 
 ### Installation
 To install this package from PyPI:

@@ -1,4 +1,4 @@
-from .core import ks1d2s, ks2d2s
+from .core import ks_1d_2samp, ks_2d_2samp
 
 from . import _version
 
