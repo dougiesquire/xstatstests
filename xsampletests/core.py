@@ -7,15 +7,18 @@ import scipy.stats
 SAMPLE_DIM = "xsampletest_sample_dim"
 
 # outputs[0] -> test statistic, outputs[1] -> p-value
+# n_args = -1 means no limit to the number of args
 scipy_function_info = {
     "ks_1d_2samp": {
         "name": "ks_2samp",
+        "n_args": 2,
         "stack_args": False,
         "remove_nans": True,
         "outputs": [0, 1],
     },
     "ad_ksamp": {
         "name": "anderson_ksamp",
+        "n_args": -1,
         "stack_args": True,
         "remove_nans": True,
         "outputs": ["statistic", "significance_level"],
@@ -49,6 +52,7 @@ def _wrap_scipy(func, args, dim, kwargs):
     args = _prep_data_1d(*args, dim=dim)
     input_core_dims = [[f"{SAMPLE_DIM}{ind+1}"] for ind in range(len(args))]
     output_core_dims = [[]] * 2
+    output_dtypes = ["float32"] * 2
     kwargs = dict(scipy_func_info=scipy_function_info[func], scipy_kwargs=kwargs)
     return xr.apply_ufunc(
         _wrap_scipy_func,
@@ -56,6 +60,7 @@ def _wrap_scipy(func, args, dim, kwargs):
         kwargs=kwargs,
         input_core_dims=input_core_dims,
         output_core_dims=output_core_dims,
+        output_dtypes=output_dtypes,
         vectorize=True,
         dask="parallelized",
     )
