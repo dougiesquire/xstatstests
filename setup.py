@@ -19,6 +19,6 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "xarray",
-        "scipy",
+        "scipy>=1.8.0",
     ],
 )

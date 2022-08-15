@@ -5,37 +5,104 @@ import numpy.testing as npt
 
 import xarray as xr
 
-from xsampletests import ks_1d_2samp, ks_2d_2samp
+import scipy.stats
+
+from xsampletests.core import scipy_function_info
+import xsampletests as xst
 from .fixtures import ds_1var
-from scipy.stats import ks_2samp
 
 
-@pytest.mark.parametrize("ds1_samples", [1000])
-@pytest.mark.parametrize("ds2_samples", [100, 1000])
+def check_vs_scipy_func(func, args, dask, kwargs={}):
+    """Test values relative to scipy function"""
+
+    def _stack_sample_dim(ds):
+        """Stack sample dim into two dimensions"""
+        new_length = int(ds.sizes["sample"] / 2)
+        return (
+            ds.assign_coords(sample_1=range(2), sample_2=range(new_length))
+            .stack(dim=["sample_1", "sample_2"])
+            .reset_index("sample", drop=True)
+            .rename(sample="dim")
+            .unstack("dim")
+        )
+
+    def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
+        """Test wrapped xsampletests func values relative to scipy"""
+        scipy_func = getattr(scipy.stats, func_info["name"])
+
+        inputs_np_1d = [
+            np.reshape(inp["var"].values, (inp.sizes["sample"], -1))[:, 0]
+            for inp in inputs
+        ]
+        outputs_np = [outputs["statistic"].values, outputs["pvalue"].values]
+
+        if func_info["stack_args"]:
+            scipy_outputs = scipy_func(inputs_np_1d, **kwargs)
+        else:
+            scipy_outputs = scipy_func(*inputs_np_1d, **kwargs)
+
+        getter = func_info["outputs"]
+        outputs_ver = [
+            getattr(scipy_outputs, g) if isinstance(g, str) else scipy_outputs[g]
+            for g in getter
+        ]
+
+        for res, ver in zip(outputs_np, outputs_ver):
+            npt.assert_allclose(res, ver)
+
+    function_info = scipy_function_info[func]
+
+    # Test with a single sample dim
+
+    outputs = getattr(xst, func)(*args, dim="sample", kwargs=kwargs)
+    if dask is False:
+        _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
+
+    # Test with multiple sample dims
+    args_stack = [_stack_sample_dim(ds) for ds in args]
+    outputs_stack = getattr(xst, func)(*args_stack, dim=["sample_1", "sample_2"])
+    if dask is False:
+        _test_vs_scipy_values(args, outputs_stack, function_info)
+
+
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 @pytest.mark.parametrize("dask", [True, False])
-def test_ks_1d_2samp(ds1_samples, ds2_samples, shape, dask):
-    """Test values of ks_1d_2samp relative to scipy.stats.ks_2samp"""
-    ds1 = ds_1var((ds1_samples,) + shape, dask)
-    ds2 = ds_1var((ds2_samples,) + shape, dask)
-    D_res, p_res = ks_1d_2samp(ds1, ds2, sample_dim="sample")
-    if dask is False:
-        ds1_1d = np.reshape(ds1["var"].values, (ds1.sizes["sample"], -1))[:, 0]
-        ds2_1d = np.reshape(ds2["var"].values, (ds2.sizes["sample"], -1))[:, 0]
-        D_ver, p_ver = ks_2samp(ds1_1d, ds2_1d)
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("method", ["auto", "exact", "asymp"])
+def test_ks_2samp_1d(
+    ds1_n_per_sample, ds2_n_per_sample, shape, dask, alternative, method
+):
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, dask),
+        ds_1var((ds2_n_per_sample,) + shape, dask),
+    ]
+    kwargs = dict(alternative=alternative, method=method)
+    check_vs_scipy_func("ks_2samp_1d", args, dask, kwargs)
 
-        npt.assert_allclose(D_res["var"].values, D_ver)
-        npt.assert_allclose(p_res["var"].values, p_ver)
 
-
-@pytest.mark.parametrize("samples", [100, 1000])
+@pytest.mark.parametrize("k_samples", [2, 3, 5])
+@pytest.mark.parametrize(
+    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
+)
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
-def test_ks_2d_2samp_identical(samples, shape):
+@pytest.mark.parametrize("dask", [True, False])
+@pytest.mark.parametrize("midrank", [True, False])
+def test_anderson_ksamp(k_samples, n_per_sample, shape, dask, midrank):
+    args = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
+    kwargs = dict(midrank=midrank)
+    check_vs_scipy_func("anderson_ksamp", args, dask, kwargs)
+
+
+@pytest.mark.parametrize("samples", [10, 50])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+def test_ks_2samp_2d_identical(samples, shape):
     """Check that KS statistical is zero for identical arrays"""
     ds1_v1 = ds_1var((samples,) + shape).rename({"var": "var_1"})
     ds1_v2 = ds_1var((samples,) + shape).rename({"var": "var_2"})
     ds1 = xr.merge([ds1_v1, ds1_v2])
     ds2 = ds1.copy()
-    D = ks_2d_2samp(ds1, ds2, "sample")
+    D = xst.ks_2samp_2d(ds1, ds2, "sample")
 
-    npt.assert_allclose(D.values, 0.0)
+    npt.assert_allclose(D["statistic"].values, 0.0)
