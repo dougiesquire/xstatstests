@@ -1,13 +1,68 @@
+import inspect
+
 import numpy as np
 import xarray as xr
-from scipy.stats import ks_2samp
+import scipy.stats
+
+SAMPLE_DIM = "xsampletest_sample_dim"
+
+# outputs[0] -> test statistic, outputs[1] -> p-value
+scipy_function_info = {
+    "ks_1d_2samp": {
+        "name": "ks_2samp",
+        "stack_args": False,
+        "remove_nans": True,
+        "outputs": [0, 1],
+    },
+    "ad_ksamp": {
+        "name": "anderson_ksamp",
+        "stack_args": True,
+        "remove_nans": True,
+        "outputs": ["statistic", "significance_level"],
+    },
+}
 
 
 # 1-dimensional tests
 # -------------------
-def ks_1d_2samp(ds1, ds2, sample_dim, **kwargs):
-    """xarray version of one-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
-    ds# should each contain one variable.
+def _wrap_scipy(func, args, dim, kwargs):
+    """Generic xarray wrapper for subset of scipy stats functions"""
+
+    def _wrap_scipy_func(*args, scipy_func_info, scipy_kwargs):
+        """Parse scipy_function_info and apply scipy function"""
+        func = getattr(scipy.stats, scipy_func_info["name"])
+        getter = scipy_func_info["outputs"]
+
+        if scipy_func_info["remove_nans"]:
+            args = [arg[~np.isnan(arg)] for arg in args]
+        if scipy_func_info["stack_args"]:
+            outputs = func(args, **scipy_kwargs)
+        else:
+            outputs = func(*args, **scipy_kwargs)
+        return tuple(
+            [getattr(outputs, g) if isinstance(g, str) else outputs[g] for g in getter]
+        )
+
+    if isinstance(dim, str):
+        dim = [dim]
+
+    args = _prep_data_1d(*args, dim=dim)
+    input_core_dims = [[f"{SAMPLE_DIM}{ind+1}"] for ind in range(len(args))]
+    output_core_dims = [[]] * 2
+    kwargs = dict(scipy_func_info=scipy_function_info[func], scipy_kwargs=kwargs)
+    return xr.apply_ufunc(
+        _wrap_scipy_func,
+        *args,
+        kwargs=kwargs,
+        input_core_dims=input_core_dims,
+        output_core_dims=output_core_dims,
+        vectorize=True,
+        dask="parallelized",
+    )
+
+
+def ks_1d_2samp(ds1, ds2, dim, kwargs={}):
+    """One-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
 
     Parameters
     ----------
@@ -15,14 +70,14 @@ def ks_1d_2samp(ds1, ds2, sample_dim, **kwargs):
         Sample 1 data
     ds2 : xarray Dataset
         Sample 2 data. Size of two samples can be different
-    sample_dim : str
-        The name of the sample dimension in ds1 and ds2
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
         Any other kwargs to pass to scipy.stats.ks_2samp
 
     Returns
     -------
-    D : xarray Dataset
+    statistic : xarray Dataset
         KS statistic estimating the max difference between the join distributions
     p-value : xarray Dataset
         The two-tailed p-value
@@ -36,48 +91,34 @@ def ks_1d_2samp(ds1, ds2, sample_dim, **kwargs):
     Hodges, J.L. Jr., “The Significance Probability of the Smirnov Two-Sample Test,”
         Arkiv fiur Matematik, 3, No. 43 (1958), 469-86.
     """
-    if isinstance(ds1, xr.Dataset) & isinstance(ds2, xr.Dataset):
-        ds1_vars = list(ds1.data_vars)
-        ds2_vars = list(ds2.data_vars)
-        assert ds1_vars == ds2_vars
-    elif isinstance(ds1, xr.DataArray) & isinstance(ds2, xr.DataArray):
-        if (ds1.name is not None) & (ds2.name is not None):
-            assert (
-                ds1.name == ds2.name
-            ), "When named DataArrays are supplied, they must have the same name"
-    else:
-        raise TypeError("Input arrays must be xarray Datasets or DataArrays")
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
 
-    ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
-    ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
-    ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
 
-    # Need to rename sample dim otherwise apply_ufunc tries to align
-    ds1 = ds1.rename({sample_dim: "s1"})
-    ds2 = ds2.rename({sample_dim: "s2"})
+def ad_ksamp(*args, dim, kwargs={}):
+    """Anderson-Darling test for k-samples.
 
-    def _wrap_ks_2samp(data1, data2):
-        # Remove nans because they get dealt with erroneously in ks_2samp
-        data1 = data1[~np.isnan(data1)]
-        data2 = data2[~np.isnan(data2)]
-        return ks_2samp(data1, data2)
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. Sizes of samples can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.ad_ksamp
 
-    return xr.apply_ufunc(
-        _wrap_ks_2samp,
-        ds1,
-        ds2,
-        **kwargs,
-        input_core_dims=[
-            ["s1"],
-            ["s2"],
-        ],
-        output_core_dims=[
-            [],
-            [],
-        ],
-        vectorize=True,
-        dask="parallelized"
-    )
+    Returns
+    -------
+    statistic : xarray Dataset
+        Normalized k-sample Anderson-Darling test statistic.
+    p-value : xarray Dataset
+        An approximate significance level at which the null hypothesis for the provided samples
+        can be rejected. The value is floored / capped at 0.1% / 25%.
+
+    See also
+    --------
+    scipy.stats.anderson_ksamp
+    """
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
 
 
 # 2-dimensional tests
@@ -168,7 +209,7 @@ def ks_2d_2samp_np(x1, y1, x2, y2):
     return (D1 + D2) / 2
 
 
-def ks_2d_2samp(ds1, ds2, sample_dim):
+def ks_2d_2samp(ds1, ds2, dim):
     """xarray version of two-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
     ds# should contain two variables corresponding to each dimension. For now, returns only the KS
     statistic with the expectation that confidence is assigned via resampling.
@@ -179,7 +220,7 @@ def ks_2d_2samp(ds1, ds2, sample_dim):
         Sample 1 data
     ds2 : xarray Dataset
         Sample 2 data. Size of two samples can be different
-    sample_dim : str
+    dim : str
         The name of the sample dimension in ds1 and ds2
 
     Returns
@@ -198,9 +239,9 @@ def ks_2d_2samp(ds1, ds2, sample_dim):
     if (not isinstance(ds1, xr.Dataset)) | (not isinstance(ds2, xr.Dataset)):
         raise TypeError("Input arrays must be xarray Datasets with 2 variables each")
 
-    ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[sample_dim])
-    ds1 = ds1.assign_coords({sample_dim: range(len(ds1[sample_dim]))})
-    ds2 = ds2.assign_coords({sample_dim: range(len(ds2[sample_dim]))})
+    ds1, ds2 = xr.broadcast(ds1.copy(), ds2.copy(), exclude=[dim])
+    ds1 = ds1.assign_coords({dim: range(len(ds1[dim]))})
+    ds2 = ds2.assign_coords({dim: range(len(ds2[dim]))})
 
     ds1_vars = list(ds1.data_vars)
     ds2_vars = list(ds2.data_vars)
@@ -208,8 +249,8 @@ def ks_2d_2samp(ds1, ds2, sample_dim):
     assert ds1_vars == ds2_vars
 
     # Need to rename sample dim otherwise apply_ufunc tries to align
-    ds1 = ds1.rename({sample_dim: "s1"})
-    ds2 = ds2.rename({sample_dim: "s2"})
+    ds1 = ds1.rename({dim: "s1"})
+    ds2 = ds2.rename({dim: "s2"})
 
     return xr.apply_ufunc(
         ks_2d_2samp_np,
@@ -219,3 +260,32 @@ def ks_2d_2samp(ds1, ds2, sample_dim):
         ds2[ds1_vars[1]],
         input_core_dims=[["s1"], ["s1"], ["s2"], ["s2"]],
     )
+
+
+def _prep_data_1d(*args, dim):
+    """Prepare data for 1D tests"""
+    if all([isinstance(ds, xr.Dataset) for ds in args]):
+        args_vars = [list(ds.data_vars) for ds in args]
+        assert all([args_vars[0] == ds_vars for ds_vars in args_vars[1:]])
+    elif all([isinstance(ds, xr.DataArray) for ds in args]):
+        if any([ds.name is not None for ds in args]):
+            assert all(
+                [args[0].name == ds.name for ds in args[1:]]
+            ), "When named DataArrays are supplied, they must have the same name"
+    else:
+        raise TypeError("Input arrays must be all xarray Datasets or DataArrays")
+
+    args = xr.broadcast(*[ds.copy() for ds in args], exclude=dim)
+
+    if len(dim) == 1:
+        args = [ds.rename({dim[0]: SAMPLE_DIM}) for ds in args]
+    else:
+        args = [ds.stack({SAMPLE_DIM: dim}) for ds in args]
+
+    args = [ds.assign_coords({SAMPLE_DIM: range(ds.sizes[SAMPLE_DIM])}) for ds in args]
+
+    # Need to rename sample dim otherwise apply_ufunc tries to align
+    args = [
+        ds.rename({SAMPLE_DIM: f"{SAMPLE_DIM}{ind+1}"}) for ind, ds in enumerate(args)
+    ]
+    return tuple(args)
