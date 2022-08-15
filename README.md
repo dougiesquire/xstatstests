@@ -9,7 +9,7 @@
 Sample testing for xarray objects. Currently includes the following distribution tests:
 - `xsampletests.ks_1d_2samp`: one-dimensional Kolmogorov-Smirnov test on two samples
 - `xsampletests.ks_2d_2samp`: two-dimensional Kolmogorov-Smirnov test on two samples
-- `#TODO`: Anderson-Darling test on N samples
+- `xsampletests.ad_ksamp`: Anderson-Darling test on K samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 
