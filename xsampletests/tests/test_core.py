@@ -7,20 +7,19 @@ import xarray as xr
 
 import scipy.stats
 
-import xsampletests as xst
 from xsampletests.core import scipy_function_info
+import xsampletests as xst
 from .fixtures import ds_1var
 
 
-def test_scipy_func(func, args, dask, kwargs={}):
+def check_vs_scipy_func(func, args, dask, kwargs={}):
     """Test values relative to scipy function"""
 
     def _stack_sample_dim(ds):
         """Stack sample dim into two dimensions"""
+        new_length = int(ds.sizes["sample"] / 2)
         return (
-            ds.assign_coords(
-                sample_1=range(2), sample_2=range(int(ds.sizes["sample"] / 2))
-            )
+            ds.assign_coords(sample_1=range(2), sample_2=range(new_length))
             .stack(dim=["sample_1", "sample_2"])
             .reset_index("sample", drop=True)
             .rename(sample="dim")
@@ -29,7 +28,7 @@ def test_scipy_func(func, args, dask, kwargs={}):
 
     def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
         """Test wrapped xsampletests func values relative to scipy"""
-        func = getattr(scipy.stats, func_info["name"])
+        scipy_func = getattr(scipy.stats, func_info["name"])
 
         inputs_np_1d = [
             np.reshape(inp["var"].values, (inp.sizes["sample"], -1))[:, 0]
@@ -38,10 +37,15 @@ def test_scipy_func(func, args, dask, kwargs={}):
         outputs_np = [out["var"].values for out in outputs]
 
         if func_info["stack_args"]:
-            scipy_outputs = func(inputs_np_1d, **kwargs)
+            scipy_outputs = scipy_func(inputs_np_1d, **kwargs)
         else:
-            scipy_outputs = func(*inputs_np_1d, **kwargs)
-        outputs_ver = [scipy_outputs[i] for i in func_info["outputs"]]
+            scipy_outputs = scipy_func(*inputs_np_1d, **kwargs)
+
+        getter = func_info["outputs"]
+        outputs_ver = [
+            getattr(scipy_outputs, g) if isinstance(g, str) else scipy_outputs[g]
+            for g in getter
+        ]
 
         for res, ver in zip(outputs_np, outputs_ver):
             npt.assert_allclose(res, ver)
@@ -75,7 +79,7 @@ def test_ks_1d_2samp(
         ds_1var((ds2_n_per_sample,) + shape, dask),
     ]
     kwargs = dict(alternative=alternative, method=method)
-    test_scipy_func("ks_1d_2samp", args, dask, kwargs)
+    check_vs_scipy_func("ks_1d_2samp", args, dask, kwargs)
 
 
 @pytest.mark.parametrize("k_samples", [2, 3, 5])
@@ -88,7 +92,7 @@ def test_ks_1d_2samp(
 def test_ad_ksamp(k_samples, n_per_sample, shape, dask, midrank):
     args = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
     kwargs = dict(midrank=midrank)
-    test_scipy_func("ad_ksamp", args, dask, kwargs)
+    check_vs_scipy_func("ad_ksamp", args, dask, kwargs)
 
 
 @pytest.mark.parametrize("samples", [100, 1000])

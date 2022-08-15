@@ -285,6 +285,7 @@ def _prep_data_1d(*args, dim):
     else:
         args = [ds.stack({SAMPLE_DIM: dim}) for ds in args]
 
+    args = [ds.drop_vars({SAMPLE_DIM, *dim}, errors="ignore") for ds in args]
     args = [ds.assign_coords({SAMPLE_DIM: range(ds.sizes[SAMPLE_DIM])}) for ds in args]
 
     # Need to rename sample dim otherwise apply_ufunc tries to align
