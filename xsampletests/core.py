@@ -11,14 +11,12 @@ SAMPLE_DIM = "xsampletest_sample_dim"
 scipy_function_info = {
     "ks_1d_2samp": {
         "name": "ks_2samp",
-        "n_args": 2,
         "stack_args": False,
         "remove_nans": True,
         "outputs": [0, 1],
     },
     "ad_ksamp": {
         "name": "anderson_ksamp",
-        "n_args": -1,
         "stack_args": True,
         "remove_nans": True,
         "outputs": ["statistic", "significance_level"],

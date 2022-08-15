@@ -12,38 +12,7 @@ from xsampletests.core import scipy_function_info
 from .fixtures import ds_1var
 
 
-def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
-    """Test wrapped xsampletests func values relative to scipy"""
-    func = getattr(scipy.stats, func_info["name"])
-    getter = func_info["outputs"]
-
-    inputs_np_1d = [
-        np.reshape(inp["var"].values, (inp.sizes["sample"], -1))[:, 0] for inp in inputs
-    ]
-    outputs_np = [out["var"].values for out in outputs]
-
-    if func_info["stack_args"]:
-        scipy_outputs = func(inputs_np_1d, **kwargs)
-    else:
-        scipy_outputs = func(*inputs_np_1d, **kwargs)
-
-    outputs_ver = [
-        getattr(scipy_outputs, g) if isinstance(g, str) else scipy_outputs[g]
-        for g in getter
-    ]
-
-    for res, ver in zip(outputs_np, outputs_ver):
-        npt.assert_allclose(res, ver)
-
-
-@pytest.mark.parametrize("func", ["ks_1d_2samp", "ad_ksamp"])
-@pytest.mark.parametrize("k_samples", [2, 3, 5])
-@pytest.mark.parametrize(
-    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
-)
-@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
-@pytest.mark.parametrize("dask", [True, False])
-def test_scipy_func(func, k_samples, n_per_sample, shape, dask):
+def test_scipy_func(func, args, dask, kwargs={}):
     """Test values relative to scipy function"""
 
     def _stack_sample_dim(ds):
@@ -58,22 +27,68 @@ def test_scipy_func(func, k_samples, n_per_sample, shape, dask):
             .unstack("dim")
         )
 
+    def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
+        """Test wrapped xsampletests func values relative to scipy"""
+        func = getattr(scipy.stats, func_info["name"])
+
+        inputs_np_1d = [
+            np.reshape(inp["var"].values, (inp.sizes["sample"], -1))[:, 0]
+            for inp in inputs
+        ]
+        outputs_np = [out["var"].values for out in outputs]
+
+        if func_info["stack_args"]:
+            scipy_outputs = func(inputs_np_1d, **kwargs)
+        else:
+            scipy_outputs = func(*inputs_np_1d, **kwargs)
+        outputs_ver = [scipy_outputs[i] for i in func_info["outputs"]]
+
+        for res, ver in zip(outputs_np, outputs_ver):
+            npt.assert_allclose(res, ver)
+
     function_info = scipy_function_info[func]
 
-    if (function_info["n_args"] != -1) & (k_samples > function_info["n_args"]):
-        pass
-    else:
-        # Test with a single sample dim
-        dss = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
-        outputs = getattr(xst, func)(*dss, dim="sample")
-        if dask is False:
-            _test_vs_scipy_values(dss, outputs, function_info)
+    # Test with a single sample dim
 
-        # Test with multiple sample dims
-        dss_stack = [_stack_sample_dim(ds) for ds in dss]
-        outputs_stack = getattr(xst, func)(*dss_stack, dim=["sample_1", "sample_2"])
-        if dask is False:
-            _test_vs_scipy_values(dss, outputs_stack, function_info)
+    outputs = getattr(xst, func)(*args, dim="sample", kwargs=kwargs)
+    if dask is False:
+        _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
+
+    # Test with multiple sample dims
+    args_stack = [_stack_sample_dim(ds) for ds in args]
+    outputs_stack = getattr(xst, func)(*args_stack, dim=["sample_1", "sample_2"])
+    if dask is False:
+        _test_vs_scipy_values(args, outputs_stack, function_info)
+
+
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("dask", [True, False])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("method", ["auto", "exact", "asymp"])
+def test_ks_1d_2samp(
+    ds1_n_per_sample, ds2_n_per_sample, shape, dask, alternative, method
+):
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, dask),
+        ds_1var((ds2_n_per_sample,) + shape, dask),
+    ]
+    kwargs = dict(alternative=alternative, method=method)
+    test_scipy_func("ks_1d_2samp", args, dask, kwargs)
+
+
+@pytest.mark.parametrize("k_samples", [2, 3, 5])
+@pytest.mark.parametrize(
+    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
+)
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("dask", [True, False])
+@pytest.mark.parametrize("midrank", [True, False])
+def test_ad_ksamp(k_samples, n_per_sample, shape, dask, midrank):
+    args = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
+    kwargs = dict(midrank=midrank)
+    test_scipy_func("ad_ksamp", args, dask, kwargs)
 
 
 @pytest.mark.parametrize("samples", [100, 1000])
