@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/dougiesquire/xsampletests/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
-Sample testing for xarray objects. Currently includes the following distribution tests:
+Sample testing for xarray objects. Currently includes the following statistical tests. Most are simply wrapped [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) functions:
 - `xsampletests.ks_2samp_1d`: one-dimensional Kolmogorov-Smirnov test on two samples
 - `xsampletests.ks_2samp_2d`: two-dimensional Kolmogorov-Smirnov test on two samples
 - `xsampletests.anderson_ksamp`: Anderson-Darling test on K samples
