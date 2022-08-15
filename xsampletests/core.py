@@ -104,7 +104,9 @@ def _wrap_scipy(func, args, dim, kwargs):
 
 
 def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
-    """One-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
+    """
+    One-dimensional Kolmogorov-Smirnov test on two samples. This test compares the
+    underlying continuous distributions F(x) and G(x) of two independent samples.
 
     Parameters
     ----------
@@ -138,7 +140,13 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
 
 
 def anderson_ksamp(*args, dim, kwargs={}):
-    """Anderson-Darling test for k-samples.
+    """
+    The Anderson-Darling test for k-samples.
+
+    The k-sample Anderson-Darling test is a modification of the one-sample
+    Anderson-Darling test. It tests the null hypothesis that k-samples are drawn
+    from the same population without having to specify the distribution function
+    of that population.
 
     Parameters
     ----------
@@ -169,11 +177,15 @@ def anderson_ksamp(*args, dim, kwargs={}):
 # 2-dimensional tests
 # -------------------
 def ks_2samp_2d_np(x1, y1, x2, y2):
-    """Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only the KS statistic.
+    """
+    Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only
+    the KS statistic.
+
     Parameters
     ----------
     x1, y1 : ndarray, shape (..., n1)
-        Data of sample 1, where n1 is the sample size. Dimensions preceding the last dimension are broadcast
+        Data of sample 1, where n1 is the sample size. Dimensions preceding the last
+        dimension are broadcast
     x2, y2 : ndarray, shape (..., n2)
         Data of sample 2, where n2 is the sample size. Size of two samples can be different.
 
@@ -192,8 +204,10 @@ def ks_2samp_2d_np(x1, y1, x2, y2):
     """
 
     def _quadct(x, y, xx, yy):
-        """Given an origin (x,y) and an array of NN points with coordinates XX and YY, count how may of them
-        are in each quadrant around the origin, and return the normalised fractions.
+        """
+        Given an origin (x,y) and an array of NN points with coordinates XX and YY, count
+        how many of them are in each quadrant around the origin, and return the normalised
+        fractions.
         """
         n = xx.shape[-1]
         ix1, ix2 = xx > x, yy > y
@@ -205,7 +219,10 @@ def ks_2samp_2d_np(x1, y1, x2, y2):
         return a, b, c, d
 
     def _maxdist(x1, y1, x2, y2):
-        """Return the max distance ranging over data points and quadrants of the integrated probabilities"""
+        """
+        Return the max distance ranging over data points and quadrants of the integrated
+        probabilities
+        """
         n1 = x1.shape[-1]
         D = np.empty((*x1.shape[:-1], 4, x1.shape[-1]))
         for i in range(n1):
@@ -255,16 +272,16 @@ def ks_2samp_2d_np(x1, y1, x2, y2):
 
 
 def ks_2samp_2d(ds1, ds2, dim):
-    """xarray version of two-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
-    ds# should contain two variables corresponding to each dimension. For now, returns only the KS
-    statistic with the expectation that confidence is assigned via resampling.
+    """
+    Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only
+    the KS statistic with the expectation that confidence is assigned via resampling.
 
     Parameters
     ----------
     ds1 : xarray Dataset
-        Sample 1 data
+        Sample 1 data containing two variables
     ds2 : xarray Dataset
-        Sample 2 data. Size of two samples can be different
+        Sample 2 data containing two variables
     dim : str
         The name of the sample dimension in ds1 and ds2
 
