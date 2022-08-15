@@ -71,7 +71,7 @@ def check_vs_scipy_func(func, args, dask, kwargs={}):
 @pytest.mark.parametrize("dask", [True, False])
 @pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
 @pytest.mark.parametrize("method", ["auto", "exact", "asymp"])
-def test_ks_1d_2samp(
+def test_ks_2samp_1d(
     ds1_n_per_sample, ds2_n_per_sample, shape, dask, alternative, method
 ):
     args = [
@@ -79,7 +79,7 @@ def test_ks_1d_2samp(
         ds_1var((ds2_n_per_sample,) + shape, dask),
     ]
     kwargs = dict(alternative=alternative, method=method)
-    check_vs_scipy_func("ks_1d_2samp", args, dask, kwargs)
+    check_vs_scipy_func("ks_2samp_1d", args, dask, kwargs)
 
 
 @pytest.mark.parametrize("k_samples", [2, 3, 5])
@@ -89,20 +89,20 @@ def test_ks_1d_2samp(
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 @pytest.mark.parametrize("dask", [True, False])
 @pytest.mark.parametrize("midrank", [True, False])
-def test_ad_ksamp(k_samples, n_per_sample, shape, dask, midrank):
+def test_anderson_ksamp(k_samples, n_per_sample, shape, dask, midrank):
     args = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
     kwargs = dict(midrank=midrank)
-    check_vs_scipy_func("ad_ksamp", args, dask, kwargs)
+    check_vs_scipy_func("anderson_ksamp", args, dask, kwargs)
 
 
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
-def test_ks_2d_2samp_identical(samples, shape):
+def test_ks_2samp_2d_identical(samples, shape):
     """Check that KS statistical is zero for identical arrays"""
     ds1_v1 = ds_1var((samples,) + shape).rename({"var": "var_1"})
     ds1_v2 = ds_1var((samples,) + shape).rename({"var": "var_2"})
     ds1 = xr.merge([ds1_v1, ds1_v2])
     ds2 = ds1.copy()
-    D = xst.ks_2d_2samp(ds1, ds2, "sample")
+    D = xst.ks_2samp_2d(ds1, ds2, "sample")
 
     npt.assert_allclose(D["statistic"].values, 0.0)

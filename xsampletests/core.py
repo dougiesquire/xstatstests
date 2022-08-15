@@ -9,13 +9,13 @@ SAMPLE_DIM = "xsampletest_sample_dim"
 # outputs[0] -> test statistic, outputs[1] -> p-value
 # n_args = -1 means no limit to the number of args
 scipy_function_info = {
-    "ks_1d_2samp": {
+    "ks_2samp_1d": {
         "name": "ks_2samp",
         "stack_args": False,
         "remove_nans": True,
         "outputs": [0, 1],
     },
-    "ad_ksamp": {
+    "anderson_ksamp": {
         "name": "anderson_ksamp",
         "stack_args": True,
         "remove_nans": True,
@@ -103,7 +103,7 @@ def _wrap_scipy(func, args, dim, kwargs):
     return xr.merge([statistic.rename("statistic"), pvalue.rename("pvalue")])
 
 
-def ks_1d_2samp(ds1, ds2, dim, kwargs={}):
+def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """One-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
 
     Parameters
@@ -137,7 +137,7 @@ def ks_1d_2samp(ds1, ds2, dim, kwargs={}):
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
 
 
-def ad_ksamp(*args, dim, kwargs={}):
+def anderson_ksamp(*args, dim, kwargs={}):
     """Anderson-Darling test for k-samples.
 
     Parameters
@@ -168,7 +168,7 @@ def ad_ksamp(*args, dim, kwargs={}):
 
 # 2-dimensional tests
 # -------------------
-def ks_2d_2samp_np(x1, y1, x2, y2):
+def ks_2samp_2d_np(x1, y1, x2, y2):
     """Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only the KS statistic.
     Parameters
     ----------
@@ -254,7 +254,7 @@ def ks_2d_2samp_np(x1, y1, x2, y2):
     return (D1 + D2) / 2
 
 
-def ks_2d_2samp(ds1, ds2, dim):
+def ks_2samp_2d(ds1, ds2, dim):
     """xarray version of two-dimensional Kolmogorov-Smirnov test on two samples, ds1 and ds2.
     ds# should contain two variables corresponding to each dimension. For now, returns only the KS
     statistic with the expectation that confidence is assigned via resampling.
@@ -285,7 +285,7 @@ def ks_2d_2samp(ds1, ds2, dim):
     args, input_core_dims = _prep_data(ds1, ds2, dim=dim, nd=2)
 
     res = xr.apply_ufunc(
-        ks_2d_2samp_np,
+        ks_2samp_2d_np,
         *args,
         input_core_dims=input_core_dims,
     )
