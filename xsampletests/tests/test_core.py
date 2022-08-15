@@ -34,7 +34,7 @@ def check_vs_scipy_func(func, args, dask, kwargs={}):
             np.reshape(inp["var"].values, (inp.sizes["sample"], -1))[:, 0]
             for inp in inputs
         ]
-        outputs_np = [out["var"].values for out in outputs]
+        outputs_np = [outputs["statistic"].values, outputs["pvalue"].values]
 
         if func_info["stack_args"]:
             scipy_outputs = scipy_func(inputs_np_1d, **kwargs)
@@ -95,7 +95,7 @@ def test_ad_ksamp(k_samples, n_per_sample, shape, dask, midrank):
     check_vs_scipy_func("ad_ksamp", args, dask, kwargs)
 
 
-@pytest.mark.parametrize("samples", [100, 1000])
+@pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2d_2samp_identical(samples, shape):
     """Check that KS statistical is zero for identical arrays"""
@@ -105,4 +105,4 @@ def test_ks_2d_2samp_identical(samples, shape):
     ds2 = ds1.copy()
     D = xst.ks_2d_2samp(ds1, ds2, "sample")
 
-    npt.assert_allclose(D.values, 0.0)
+    npt.assert_allclose(D["statistic"].values, 0.0)
