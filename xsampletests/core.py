@@ -42,6 +42,14 @@ scipy_function_info = {
         "axis_arg": True,
         "outputs": [0, 1],
     },
+    "cramervonmises_2samp": {
+        "name": "cramervonmises_2samp",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "axis_arg": False,
+        "outputs": ["statistic", "pvalue"],
+    },
 }
 
 
@@ -147,8 +155,8 @@ def _wrap_scipy(func, args, dim, kwargs):
 
 def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """
-    One-dimensional Kolmogorov-Smirnov test on two samples. This test compares the
-    underlying continuous distributions F(x) and G(x) of two independent samples.
+    The one-dimensional Kolmogorov-Smirnov test on two samples. This test compares
+    the underlying continuous distributions F(x) and G(x) of two independent samples.
 
     Parameters
     ----------
@@ -167,7 +175,7 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     statistics : xarray Dataset
         Dataset with the following variables:
         - "statistic" : The KS statistic
-        - "pvalue" : One-tailed or two-tailed p-value.
+        - "pvalue" : One-tailed or two-tailed p-value
 
     See also
     --------
@@ -205,10 +213,10 @@ def anderson_ksamp(*args, dim, kwargs={}):
     -------
     statistics : xarray Dataset
         Dataset with the following variables:
-        - "statistic" : Normalized k-sample Anderson-Darling test statistic.
+        - "statistic" : Normalized k-sample Anderson-Darling test statistic
         - "pvalue" : An approximate significance level at which the null hypothesis
             for the provided samples can be rejected. The value is floored / capped
-            at 0.1% / 25%.
+            at 0.1% / 25%
 
     See also
     --------
@@ -220,7 +228,7 @@ def anderson_ksamp(*args, dim, kwargs={}):
 
 def ttest_ind(ds1, ds2, dim, kwargs={}):
     """
-    Calculate the T-test for the means of two independent samples of scores.
+    The T-test for the means of two independent samples of scores.
 
     This is a test for the null hypothesis that 2 independent samples have identical
     average (expected) values. This test assumes that the populations have identical
@@ -233,7 +241,7 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
     ds2 : xarray Dataset
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
-        The name of the sample dimension(s) in args
+        The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
         Any other kwargs to pass to scipy.stats.ttest_ind
 
@@ -241,7 +249,7 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
     -------
     statistics : xarray Dataset
         Dataset with the following variables:
-        - "statistic" : The t-statistic.
+        - "statistic" : The t-statistic
         - "pvalue" : The p-value
 
     See also
@@ -254,7 +262,7 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
 
 def ttest_rel(ds1, ds2, dim, kwargs={}):
     """
-    Calculate the T-test for the means of two related samples of scores.
+    The T-test for the means of two related samples of scores.
 
     This is a test for the null hypothesis that two related or repeated samples
     have identical average (expected) values.
@@ -274,12 +282,46 @@ def ttest_rel(ds1, ds2, dim, kwargs={}):
     -------
     statistics : xarray Dataset
         Dataset with the following variables:
-        - "statistic" : The t-statistic.
+        - "statistic" : The t-statistic
         - "pvalue" : The p-value
 
     See also
     --------
     scipy.stats.ttest_rel
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
+    """
+    The two-sample Cramér-von Mises test for goodness of fit.
+
+    This is the two-sample version of the Cramér-von Mises test: for two independent
+    samples,the null hypothesis is that the samples come from the same (unspecified)
+    continuous distribution.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.cramervonmises_2samp
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Cramér-von Mises statistic
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.cramervonmises_2samp
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -392,9 +434,10 @@ def ks_2samp_2d(ds1, ds2, dim):
     ds1 : xarray Dataset
         Sample 1 data containing two variables
     ds2 : xarray Dataset
-        Sample 2 data containing two variables
+        Sample 2 data containing two variables. The sizes of samples 1 and 2 along dim
+        can be different
     dim : str
-        The name of the sample dimension in ds1 and ds2
+        The name of the sample dimension(s) in ds1 and ds2
 
     Returns
     -------

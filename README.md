@@ -7,11 +7,12 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
 Sample testing for xarray objects. Currently includes the following statistical tests (most are currently simple, often vectorized, wrappers of [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) functions):
-- `xsampletests.ks_2samp_1d`: one-dimensional Kolmogorov-Smirnov test on two samples
-- `xsampletests.ks_2samp_2d`: two-dimensional Kolmogorov-Smirnov test on two samples
-- `xsampletests.anderson_ksamp`: Anderson-Darling test on K samples
+- `xsampletests.ks_2samp_1d`: one-dimensional Kolmogorov-Smirnov test of two indepedent samples
+- `xsampletests.ks_2samp_2d`: two-dimensional Kolmogorov-Smirnov test of two independent samples
+- `xsampletests.anderson_ksamp`: Anderson-Darling test of K independent samples
 - `xsampletests.ttest_ind` : t-test for the means of two independent samples
 - `xsampletests.ttest_rel` : t-test for the means of two related samples
+- `xsampletests.cramervonmises_2samp` : Cramér-von Mises test of two independent samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 

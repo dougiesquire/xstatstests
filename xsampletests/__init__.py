@@ -1,4 +1,11 @@
-from .core import ks_2samp_1d, ks_2samp_2d, anderson_ksamp, ttest_ind, ttest_rel
+from .core import (
+    ks_2samp_1d,
+    ks_2samp_2d,
+    anderson_ksamp,
+    ttest_ind,
+    ttest_rel,
+    cramervonmises_2samp,
+)
 
 from . import _version
 

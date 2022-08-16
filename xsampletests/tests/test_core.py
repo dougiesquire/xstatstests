@@ -164,6 +164,22 @@ def test_ttest_rel_values(
     check_vs_scipy_func("ttest_rel", args, kwargs)
 
 
+@pytest.mark.parametrize("ds1_n_per_sample", [2, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [2, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("method", ["auto", "exact", "asymptotic"])
+def test_cramervonmises_2samp_values(ds1_n_per_sample, ds2_n_per_sample, shape, method):
+    """Check cramervonmises_2samp relative to scipy func"""
+    if (method == "exact") & ((ds1_n_per_sample > 2) | (ds2_n_per_sample > 2)):
+        pytest.skip("method == 'exact' is very slow for large samples.")
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=False, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    kwargs = dict(method=method)
+    check_vs_scipy_func("cramervonmises_2samp", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
