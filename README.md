@@ -1,5 +1,6 @@
 ## xsampletests
 
+[![PyPI](https://img.shields.io/pypi/v/xsampletests)](https://pypi.org/project/xsampletests)
 [![tests](https://github.com/dougiesquire/xsampletests/actions/workflows/tests.yml/badge.svg)](https://github.com/dougiesquire/xsampletests/actions/workflows/tests.yml)
 [![pre-commit](https://github.com/dougiesquire/xsampletests/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dougiesquire/xsampletests/actions/workflows/pre-commit.yml)
 [![codecov](https://codecov.io/gh/dougiesquire/xsampletests/branch/main/graph/badge.svg?token=DBGC0FIRLA)](https://codecov.io/gh/dougiesquire/xsampletests)
@@ -37,8 +38,11 @@ This package was originally called `xks` but was renamed when tests additional t
 ### Installation
 To install this package from PyPI:
 ```
-#TODO
+pip install xsampletests
 ```
+
+### Contributing
+Contributions are very welcome, particularly in the form of reporting bugs and writing tests. Please open an issue and check out the [contributor guide](CONTRIBUTING.md).
 
 ### References
 
