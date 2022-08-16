@@ -141,6 +141,29 @@ def test_ttest_ind_values(
         check_vs_scipy_func("ttest_ind", args, kwargs)
 
 
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+def test_ttest_rel_values(
+    shape,
+    add_nans,
+    nan_policy,
+    alternative,
+):
+    """Check ttest_rel relative to scipy func"""
+    ds1_n_per_sample = ds2_n_per_sample = 10
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+    ]
+    kwargs = dict(
+        nan_policy=nan_policy,
+        alternative=alternative,
+    )
+    check_vs_scipy_func("ttest_rel", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
@@ -154,7 +177,7 @@ def test_ks_2samp_2d_identical(samples, shape):
     npt.assert_allclose(D["statistic"].values, 0.0)
 
 
-@pytest.mark.parametrize("func", ["ttest_ind"])
+@pytest.mark.parametrize("func", ["ttest_ind", "ttest_rel"])
 @pytest.mark.parametrize("dask", [True, False])
 def test_axis_error(func, dask):
     """Check that error is thrown when axis kwarg is provided to scipy funcs"""
@@ -165,10 +188,23 @@ def test_axis_error(func, dask):
         getattr(xst, func)(*args, "sample", {"axis": 0})
 
 
-@pytest.mark.parametrize("func", ["ks_2samp_1d", "anderson_ksamp", "ttest_ind"])
+@pytest.mark.parametrize(
+    "func", ["ks_2samp_1d", "anderson_ksamp", "ttest_ind", "ttest_rel"]
+)
 def test_dask_compute(func):
     """Check that functions run with dask arrays and don't compute"""
-    n_per_sample = [10, 20]
+    n_per_sample = [10, 10]
     shape = (2, 3)
     args = [ds_1var((n,) + shape, True) for n in n_per_sample]
     getattr(xst, func)(*args, dim="sample")
+
+
+@pytest.mark.parametrize("func", ["ttest_rel"])
+@pytest.mark.parametrize("dask", [True, False])
+def test_sample_size_error(func, dask):
+    """Check that error is thrown when sample sizes differ for functions that don't allow this"""
+    n_per_sample = [10, 20]
+    shape = (2, 3)
+    args = [ds_1var((n,) + shape, dask) for n in n_per_sample]
+    with pytest.raises(ValueError):
+        getattr(xst, func)(*args, dim="sample")

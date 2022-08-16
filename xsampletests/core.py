@@ -6,12 +6,14 @@ import scipy.stats
 
 SAMPLE_DIM = "xsampletest_sample_dim"
 
-# outputs[0] -> test statistic, outputs[1] -> p-value
+# Enter outputs so that first output is the test statistic and the second
+# output is the p-value
 # n_args = -1 means no limit to the number of args
 scipy_function_info = {
     "ks_2samp_1d": {
         "name": "ks_2samp",
         "stack_args": False,
+        "same_sample_sizes": False,
         "remove_nans": True,
         "axis_arg": False,
         "outputs": [0, 1],
@@ -19,6 +21,7 @@ scipy_function_info = {
     "anderson_ksamp": {
         "name": "anderson_ksamp",
         "stack_args": True,
+        "same_sample_sizes": False,
         "remove_nans": True,
         "axis_arg": False,
         "outputs": ["statistic", "significance_level"],
@@ -26,6 +29,15 @@ scipy_function_info = {
     "ttest_ind": {
         "name": "ttest_ind",
         "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "axis_arg": True,
+        "outputs": [0, 1],
+    },
+    "ttest_rel": {
+        "name": "ttest_rel",
+        "stack_args": False,
+        "same_sample_sizes": True,
         "remove_nans": False,
         "axis_arg": True,
         "outputs": [0, 1],
@@ -93,9 +105,16 @@ def _wrap_scipy(func, args, dim, kwargs):
             [getattr(outputs, g) if isinstance(g, str) else outputs[g] for g in getter]
         )
 
+    info = scipy_function_info[func]
+
     args, input_core_dims = _prep_data(*args, dim=dim, nd=1)
 
-    info = scipy_function_info[func]
+    sample_sizes = [ds.sizes[dim[0]] for ds, dim in zip(args, input_core_dims)]
+    same_sample_sizes = all([sample_sizes[0] == samp for samp in sample_sizes[1:]])
+    if info["same_sample_sizes"] & (not same_sample_sizes):
+        raise ValueError(
+            f"`{func}` requires that the sample size is the same for all input arrays"
+        )
 
     # Simply vectorize if function does not allow axis argument
     scipy_kwargs = kwargs.copy()
@@ -228,6 +247,39 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
     See also
     --------
     scipy.stats.ttest_ind
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def ttest_rel(ds1, ds2, dim, kwargs={}):
+    """
+    Calculate the T-test for the means of two related samples of scores.
+
+    This is a test for the null hypothesis that two related or repeated samples
+    have identical average (expected) values.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim must be the same
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.ttest_rel
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The t-statistic.
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.ttest_rel
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
