@@ -106,6 +106,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "bartlett": {
+        "name": "bartlett",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -285,7 +293,7 @@ def anderson_ksamp(*args, dim, kwargs={}):
 
 def ttest_ind(ds1, ds2, dim, kwargs={}):
     """
-    The T-test for the means of two independent samples of scores.
+    The T-test for the means of two independent samples.
 
     This is a test for the null hypothesis that 2 independent samples have identical
     average (expected) values. This test assumes that the populations have identical
@@ -319,7 +327,7 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
 
 def ttest_rel(ds1, ds2, dim, kwargs={}):
     """
-    The T-test for the means of two related samples of scores.
+    The T-test for the means of two related samples.
 
     This is a test for the null hypothesis that two related or repeated samples
     have identical average (expected) values.
@@ -630,6 +638,39 @@ def ansari(ds1, ds2, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def bartlett(*args, dim, kwargs={}):
+    """
+    The Bartlett test for the variances of two independent samples.
+
+    Bartlett’s test tests the null hypothesis that all input samples are from populations
+    with equal variances. For samples from significantly non-normal populations, Levene’s
+    test levene is more robust.
+
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. Nans are automatically removed prior to executing the test.
+        The sizes of the samples along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.bartlett
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Bartlett test statistic
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.bartlett
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
 
 
 # 2-dimensional tests

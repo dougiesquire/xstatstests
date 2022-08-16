@@ -12,6 +12,7 @@ from .core import (
     friedmanchisquare,
     brunnermunzel,
     ansari,
+    bartlett,
 )
 
 from . import _version
