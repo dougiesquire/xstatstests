@@ -13,6 +13,7 @@ Sample testing for xarray objects. Currently includes the following statistical 
 - `xsampletests.ttest_ind` : t-test for the means of two independent samples
 - `xsampletests.ttest_rel` : t-test for the means of two related samples
 - `xsampletests.cramervonmises_2samp` : Cramér-von Mises test of two independent samples
+- `xsampletests.epps_singleton_2samp` : Epps-Singleton test of two independent samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 

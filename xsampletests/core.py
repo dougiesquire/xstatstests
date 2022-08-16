@@ -50,6 +50,14 @@ scipy_function_info = {
         "axis_arg": False,
         "outputs": ["statistic", "pvalue"],
     },
+    "epps_singleton_2samp": {
+        "name": "epps_singleton_2samp",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "axis_arg": False,
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -155,8 +163,10 @@ def _wrap_scipy(func, args, dim, kwargs):
 
 def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """
-    The one-dimensional Kolmogorov-Smirnov test on two samples. This test compares
-    the underlying continuous distributions F(x) and G(x) of two independent samples.
+    The one-dimensional Kolmogorov-Smirnov test on two samples.
+
+    This test compares the underlying continuous distributions F(x) and G(x) of
+    two independent samples.
 
     Parameters
     ----------
@@ -322,6 +332,39 @@ def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
     See also
     --------
     scipy.stats.cramervonmises_2samp
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def epps_singleton_2samp(ds1, ds2, dim, kwargs={}):
+    """
+    The Epps-Singleton (ES) test on two samples.
+
+    This tests the null hypothesis that two samples have the same underlying probability
+    distribution.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.epps_singleton_2samp
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Epps-Singleton statistic
+        - "pvalue" : The  p-value based on the asymptotic chi2-distribution.
+
+    See also
+    --------
+    scipy.stats.epps_singleton_2samp
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)

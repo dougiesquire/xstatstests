@@ -5,6 +5,7 @@ from .core import (
     ttest_ind,
     ttest_rel,
     cramervonmises_2samp,
+    epps_singleton_2samp,
 )
 
 from . import _version
