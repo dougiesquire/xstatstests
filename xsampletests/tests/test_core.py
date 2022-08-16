@@ -360,6 +360,26 @@ def test_bartlett_values(
     check_vs_scipy_func("bartlett", args)
 
 
+@pytest.mark.parametrize("k_samples", [2, 3, 5])
+@pytest.mark.parametrize(
+    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
+)
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("center", ["mean", "median", "trimmed"])
+@pytest.mark.parametrize("proportiontocut", [0.01, 0.05, 0.1])
+def test_levene_values(k_samples, n_per_sample, shape, center, proportiontocut):
+    """Check levene relative to scipy func"""
+    args = [
+        ds_1var((n,) + shape, add_nans=False, dask=False)
+        for n in n_per_sample[slice(k_samples)]
+    ]
+    kwargs = dict(
+        center=center,
+        proportiontocut=proportiontocut,
+    )
+    check_vs_scipy_func("levene", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):

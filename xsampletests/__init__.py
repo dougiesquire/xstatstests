@@ -13,6 +13,7 @@ from .core import (
     brunnermunzel,
     ansari,
     bartlett,
+    levene,
 )
 
 from . import _version

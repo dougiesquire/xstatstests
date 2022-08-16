@@ -114,6 +114,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "levene": {
+        "name": "levene",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -668,6 +676,39 @@ def bartlett(*args, dim, kwargs={}):
     See also
     --------
     scipy.stats.bartlett
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
+
+
+def levene(*args, dim, kwargs={}):
+    """
+    The Levene test for the variances of two independent samples.
+
+    The Levene test tests the null hypothesis that all input samples are from populations
+    with equal variances. Levene’s test is an alternative to Bartlett’s test in the case
+    where there are significant deviations from normality.
+
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. Nans are automatically removed prior to executing the test.
+        The sizes of the samples along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.levene
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Levene test statistic
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.levene
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
