@@ -40,6 +40,9 @@ To install this package from PyPI:
 #TODO
 ```
 
+### Contributing
+Contributions are very welcome, particularly in the form of reporting bugs and writing tests. Please open an issue and check out the [contributor guide](CONTRIBUTING.md).
+
 ### References
 
 Press, W.H. et al. 2007, Numerical Recipes, section 14.8
