@@ -194,6 +194,37 @@ def test_epps_singleton_2samp_values(ds1_n_per_sample, ds2_n_per_sample, shape, 
     check_vs_scipy_func("epps_singleton_2samp", args, kwargs)
 
 
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("use_continuity", [True, False])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("method", ["auto", "exact", "asymptotic"])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+def test_mannwhitneyu_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    add_nans,
+    use_continuity,
+    alternative,
+    method,
+    nan_policy,
+):
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+    ]
+    kwargs = dict(
+        use_continuity=use_continuity,
+        alternative=alternative,
+        method=method,
+        nan_policy=nan_policy,
+    )
+    check_vs_scipy_func("mannwhitneyu", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
@@ -207,15 +238,17 @@ def test_ks_2samp_2d_identical(samples, shape):
     npt.assert_allclose(D["statistic"].values, 0.0)
 
 
-@pytest.mark.parametrize("func", ["ttest_ind", "ttest_rel"])
+@pytest.mark.parametrize("func", ["ttest_ind", "ttest_rel", "mannwhitneyu"])
 @pytest.mark.parametrize("dask", [True, False])
-def test_axis_error(func, dask):
-    """Check that error is thrown when axis kwarg is provided to scipy funcs"""
-    n_per_sample = [10, 20]
+def test_disallowed_error(func, dask):
+    """Check that error is thrown when a disallowed kwarg is provided to scipy funcs"""
+    n_per_sample = [10, 10]
     shape = (2, 3)
     args = [ds_1var((n,) + shape, dask) for n in n_per_sample]
-    with pytest.raises(ValueError):
-        getattr(xst, func)(*args, "sample", {"axis": 0})
+    kws = scipy_function_info[func]["disallowed_kwargs"]
+    for kw in kws:
+        with pytest.raises(ValueError):
+            getattr(xst, func)(*args, dim="sample", kwargs={kw: None})
 
 
 @pytest.mark.parametrize(

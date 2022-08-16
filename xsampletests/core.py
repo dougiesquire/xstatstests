@@ -15,7 +15,7 @@ scipy_function_info = {
         "stack_args": False,
         "same_sample_sizes": False,
         "remove_nans": True,
-        "axis_arg": False,
+        "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
     "anderson_ksamp": {
@@ -23,7 +23,7 @@ scipy_function_info = {
         "stack_args": True,
         "same_sample_sizes": False,
         "remove_nans": True,
-        "axis_arg": False,
+        "disallowed_kwargs": [],
         "outputs": ["statistic", "significance_level"],
     },
     "ttest_ind": {
@@ -31,7 +31,7 @@ scipy_function_info = {
         "stack_args": False,
         "same_sample_sizes": False,
         "remove_nans": False,
-        "axis_arg": True,
+        "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
     "ttest_rel": {
@@ -39,7 +39,7 @@ scipy_function_info = {
         "stack_args": False,
         "same_sample_sizes": True,
         "remove_nans": False,
-        "axis_arg": True,
+        "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
     "cramervonmises_2samp": {
@@ -47,7 +47,7 @@ scipy_function_info = {
         "stack_args": False,
         "same_sample_sizes": False,
         "remove_nans": True,
-        "axis_arg": False,
+        "disallowed_kwargs": [],
         "outputs": ["statistic", "pvalue"],
     },
     "epps_singleton_2samp": {
@@ -55,8 +55,16 @@ scipy_function_info = {
         "stack_args": False,
         "same_sample_sizes": False,
         "remove_nans": True,
-        "axis_arg": False,
+        "disallowed_kwargs": [],
         "outputs": [0, 1],
+    },
+    "mannwhitneyu": {
+        "name": "mannwhitneyu",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis", "keepdims"],
+        "outputs": ["statistic", "pvalue"],
     },
 }
 
@@ -132,17 +140,16 @@ def _wrap_scipy(func, args, dim, kwargs):
             f"`{func}` requires that the sample size is the same for all input arrays"
         )
 
-    # Simply vectorize if function does not allow axis argument
     scipy_kwargs = kwargs.copy()
-    if info["axis_arg"]:
-        vectorize = False
-        if "axis" in scipy_kwargs.keys():
-            raise ValueError(
-                "`axis` kwarg cannot be specified as the axis/axes are specified by `dim`"
-            )
-        scipy_kwargs["axis"] = -1
-    else:
-        vectorize = True
+
+    # Simply vectorize if function does not allow axis argument
+    vectorize = True
+    for kw in info["disallowed_kwargs"]:
+        if kw in scipy_kwargs.keys():
+            raise ValueError(f"`{kw}` kwarg is disallowed by xsampletests")
+        if kw == "axis":
+            vectorize = False
+            scipy_kwargs["axis"] = -1
 
     output_core_dims = [[]] * 2
     output_dtypes = ["float32"] * 2
@@ -165,7 +172,7 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """
     The one-dimensional Kolmogorov-Smirnov test on two samples.
 
-    This test compares the underlying continuous distributions F(x) and G(x) of
+    This test compares the underlying continuous distributions ds1 and ds2 of
     two independent samples.
 
     Parameters
@@ -360,11 +367,47 @@ def epps_singleton_2samp(ds1, ds2, dim, kwargs={}):
     statistics : xarray Dataset
         Dataset with the following variables:
         - "statistic" : The Epps-Singleton statistic
-        - "pvalue" : The  p-value based on the asymptotic chi2-distribution.
+        - "pvalue" : The p-value based on the asymptotic chi2-distribution
 
     See also
     --------
     scipy.stats.epps_singleton_2samp
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def mannwhitneyu(ds1, ds2, dim, kwargs={}):
+    """
+    The Mann-Whitney U rank test on two independent samples.
+
+    The Mann-Whitney U test is a nonparametric test of the null hypothesis that the
+    distribution underlying sample ds1 is the same as the distribution underlying
+    sample ds2. It is often used as a test of difference in location between distributions.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.mannwhitneyu
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Mann-Whitney U statistic corresponding with sample ds1. See the
+            scipy.stats.epps_singleton_2samp documentation for how to calculate the U
+            statistic corresponding with sample ds2
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.mannwhitneyu
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -471,6 +514,9 @@ def ks_2samp_2d(ds1, ds2, dim):
     """
     Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only
     the KS statistic with the expectation that confidence is assigned via resampling.
+
+    This test compares the underlying continuous distributions ds1 and ds2 of two
+    two-dimensional independent samples.
 
     Parameters
     ----------
