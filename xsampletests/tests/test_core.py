@@ -252,6 +252,31 @@ def test_ranksums_values(
     check_vs_scipy_func("ranksums", args, kwargs)
 
 
+@pytest.mark.parametrize("k_samples", [2, 3, 5])
+@pytest.mark.parametrize(
+    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
+)
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+def test_kruskal_values(
+    k_samples,
+    n_per_sample,
+    shape,
+    add_nans,
+    nan_policy,
+):
+    """Check kruskal relative to scipy func"""
+    args = [
+        ds_1var((n,) + shape, add_nans=add_nans, dask=False)
+        for n in n_per_sample[slice(k_samples)]
+    ]
+    kwargs = dict(
+        nan_policy=nan_policy,
+    )
+    check_vs_scipy_func("kruskal", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):

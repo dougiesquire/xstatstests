@@ -74,6 +74,14 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis", "keepdims"],
         "outputs": [0, 1],
     },
+    "kruskal": {
+        "name": "kruskal",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis", "keepdims"],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -329,9 +337,10 @@ def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
     Parameters
     ----------
     ds1 : xarray Dataset
-        Sample 1 data.
+        Sample 1 data. Nans are automatically removed prior to executing the test
     ds2 : xarray Dataset
-        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+        Sample 2 data. Nans are automatically removed prior to executing the test.
+        The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
@@ -362,9 +371,10 @@ def epps_singleton_2samp(ds1, ds2, dim, kwargs={}):
     Parameters
     ----------
     ds1 : xarray Dataset
-        Sample 1 data.
+        Sample 1 data. Nans are automatically removed prior to executing the test
     ds2 : xarray Dataset
-        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+        Sample 2 data. Nans are automatically removed prior to executing the test.
+        The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
@@ -455,6 +465,39 @@ def ranksums(ds1, ds2, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def kruskal(*args, dim, kwargs={}):
+    """
+    The Kruskal-Wallis H-test for K independent samples.
+
+    The Kruskal-Wallis H-test tests the null hypothesis that the population median of all of the
+    groups are equal. It is a non-parametric version of ANOVA.
+
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. The sizes of the samples along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.kruskal
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Kruskal-Wallis H statistic, corrected for ties.
+        - "pvalue" : The p-value for the test using the assumption that H has a chi square
+            distribution. The p-value returned is the survival function of the chi square
+            distribution evaluated at H.
+
+    See also
+    --------
+    scipy.stats.kruskal
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
 
 
 # 2-dimensional tests

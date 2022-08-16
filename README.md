@@ -16,6 +16,7 @@ Sample testing for xarray objects. Currently includes the following statistical 
 - `xsampletests.epps_singleton_2samp` : Epps-Singleton test on two independent samples
 - `xsampletests.mannwhitneyu` : Mann-Whitney U rank test on two independent samples
 - `xsampletests.ranksums` : Wilcoxon rank-sum statistic on two independent samples
+- `xsampletests.kruskal` : Kruskal-Wallis H-test on K independent samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 

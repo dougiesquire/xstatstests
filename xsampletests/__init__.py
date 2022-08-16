@@ -8,6 +8,7 @@ from .core import (
     epps_singleton_2samp,
     mannwhitneyu,
     ranksums,
+    kruskal,
 )
 
 from . import _version
