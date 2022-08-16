@@ -7,6 +7,7 @@ from .core import (
     cramervonmises_2samp,
     epps_singleton_2samp,
     mannwhitneyu,
+    ranksums,
 )
 
 from . import _version

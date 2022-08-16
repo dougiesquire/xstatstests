@@ -212,6 +212,7 @@ def test_mannwhitneyu_values(
     method,
     nan_policy,
 ):
+    """Check mannwhitneyu relative to scipy func"""
     args = [
         ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
         ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
@@ -223,6 +224,32 @@ def test_mannwhitneyu_values(
         nan_policy=nan_policy,
     )
     check_vs_scipy_func("mannwhitneyu", args, kwargs)
+
+
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+def test_ranksums_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    add_nans,
+    alternative,
+    nan_policy,
+):
+    """Check ranksums relative to scipy func"""
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+    ]
+    kwargs = dict(
+        alternative=alternative,
+        nan_policy=nan_policy,
+    )
+    check_vs_scipy_func("ranksums", args, kwargs)
 
 
 @pytest.mark.parametrize("samples", [10, 50])

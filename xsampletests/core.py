@@ -66,6 +66,14 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis", "keepdims"],
         "outputs": ["statistic", "pvalue"],
     },
+    "ranksums": {
+        "name": "ranksums",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis", "keepdims"],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -408,6 +416,42 @@ def mannwhitneyu(ds1, ds2, dim, kwargs={}):
     See also
     --------
     scipy.stats.mannwhitneyu
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def ranksums(ds1, ds2, dim, kwargs={}):
+    """
+    The Wilcoxon rank-sum statistic for two independent samples.
+
+    The Wilcoxon rank-sum test tests the null hypothesis that two sets of measurements are drawn
+    from the same distribution. The alternative hypothesis is that values in one sample are more
+    likely to be larger than the values in the other sample. This test should be used to compare
+    two samples from continuous distributions. It does not handle ties between ds1 and ds2.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.ranksums
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Wilcoxon rank-sum statistic under the large-sample approximation that
+            the rank sum statistic is normally distributed.
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.ranksums
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
