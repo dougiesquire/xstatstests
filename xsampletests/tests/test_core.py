@@ -12,7 +12,7 @@ import xsampletests as xst
 from .fixtures import ds_1var
 
 
-def check_vs_scipy_func(func, args, dask, kwargs={}):
+def check_vs_scipy_func(func, args, kwargs={}):
     """Test values relative to scipy function"""
 
     def _stack_sample_dim(ds):
@@ -55,31 +55,31 @@ def check_vs_scipy_func(func, args, dask, kwargs={}):
     # Test with a single sample dim
 
     outputs = getattr(xst, func)(*args, dim="sample", kwargs=kwargs)
-    if dask is False:
-        _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
+    _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
 
     # Test with multiple sample dims
     args_stack = [_stack_sample_dim(ds) for ds in args]
-    outputs_stack = getattr(xst, func)(*args_stack, dim=["sample_1", "sample_2"])
-    if dask is False:
-        _test_vs_scipy_values(args, outputs_stack, function_info)
+    outputs_stack = getattr(xst, func)(
+        *args_stack, dim=["sample_1", "sample_2"], kwargs=kwargs
+    )
+    _test_vs_scipy_values(args, outputs_stack, function_info, kwargs=kwargs)
 
 
 @pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
 @pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
-@pytest.mark.parametrize("dask", [True, False])
 @pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
 @pytest.mark.parametrize("method", ["auto", "exact", "asymp"])
-def test_ks_2samp_1d(
-    ds1_n_per_sample, ds2_n_per_sample, shape, dask, alternative, method
+def test_ks_2samp_1d_values(
+    ds1_n_per_sample, ds2_n_per_sample, shape, alternative, method
 ):
+    """Check ks_2samp_1d relative to scipy func"""
     args = [
-        ds_1var((ds1_n_per_sample,) + shape, dask),
-        ds_1var((ds2_n_per_sample,) + shape, dask),
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=False, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=False, dask=False),
     ]
     kwargs = dict(alternative=alternative, method=method)
-    check_vs_scipy_func("ks_2samp_1d", args, dask, kwargs)
+    check_vs_scipy_func("ks_2samp_1d", args, kwargs)
 
 
 @pytest.mark.parametrize("k_samples", [2, 3, 5])
@@ -87,12 +87,58 @@ def test_ks_2samp_1d(
     "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
 )
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
-@pytest.mark.parametrize("dask", [True, False])
 @pytest.mark.parametrize("midrank", [True, False])
-def test_anderson_ksamp(k_samples, n_per_sample, shape, dask, midrank):
-    args = [ds_1var((n,) + shape, dask) for n in n_per_sample[slice(k_samples)]]
+def test_anderson_ksamp_values(k_samples, n_per_sample, shape, midrank):
+    """Check anderson_ksamp relative to scipy func"""
+    args = [
+        ds_1var((n,) + shape, add_nans=False, dask=False)
+        for n in n_per_sample[slice(k_samples)]
+    ]
     kwargs = dict(midrank=midrank)
-    check_vs_scipy_func("anderson_ksamp", args, dask, kwargs)
+    check_vs_scipy_func("anderson_ksamp", args, kwargs)
+
+
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("equal_var", [True, False])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+@pytest.mark.parametrize("permutations", [0, 1000])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("trim", [0, 0.4])
+def test_ttest_ind_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    add_nans,
+    equal_var,
+    nan_policy,
+    permutations,
+    alternative,
+    trim,
+):
+    """Check ttest_ind relative to scipy func"""
+    if (nan_policy == "omit") & ((permutations != 0) | (trim != 0)):
+        pytest.skip(
+            "nan_policy='omit' is currently not supported by permutation tests or trimmed tests."
+        )
+    elif (permutations != 0) & (trim != 0):
+        pytest.skip("Permutations are currently not supported with trimming.")
+    else:
+        args = [
+            ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+            ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+        ]
+        kwargs = dict(
+            equal_var=equal_var,
+            nan_policy=nan_policy,
+            permutations=permutations,
+            random_state=0,
+            alternative=alternative,
+            trim=trim,
+        )
+        check_vs_scipy_func("ttest_ind", args, kwargs)
 
 
 @pytest.mark.parametrize("samples", [10, 50])
@@ -106,3 +152,23 @@ def test_ks_2samp_2d_identical(samples, shape):
     D = xst.ks_2samp_2d(ds1, ds2, "sample")
 
     npt.assert_allclose(D["statistic"].values, 0.0)
+
+
+@pytest.mark.parametrize("func", ["ttest_ind"])
+@pytest.mark.parametrize("dask", [True, False])
+def test_axis_error(func, dask):
+    """Check that error is thrown when axis kwarg is provided to scipy funcs"""
+    n_per_sample = [10, 20]
+    shape = (2, 3)
+    args = [ds_1var((n,) + shape, dask) for n in n_per_sample]
+    with pytest.raises(ValueError):
+        getattr(xst, func)(*args, "sample", {"axis": 0})
+
+
+@pytest.mark.parametrize("func", ["ks_2samp_1d", "anderson_ksamp", "ttest_ind"])
+def test_dask_compute(func):
+    """Check that functions run with dask arrays and don't compute"""
+    n_per_sample = [10, 20]
+    shape = (2, 3)
+    args = [ds_1var((n,) + shape, True) for n in n_per_sample]
+    getattr(xst, func)(*args, dim="sample")

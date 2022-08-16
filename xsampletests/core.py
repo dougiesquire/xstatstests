@@ -13,13 +13,22 @@ scipy_function_info = {
         "name": "ks_2samp",
         "stack_args": False,
         "remove_nans": True,
+        "axis_arg": False,
         "outputs": [0, 1],
     },
     "anderson_ksamp": {
         "name": "anderson_ksamp",
         "stack_args": True,
         "remove_nans": True,
+        "axis_arg": False,
         "outputs": ["statistic", "significance_level"],
+    },
+    "ttest_ind": {
+        "name": "ttest_ind",
+        "stack_args": False,
+        "remove_nans": False,
+        "axis_arg": True,
+        "outputs": [0, 1],
     },
 }
 
@@ -86,9 +95,23 @@ def _wrap_scipy(func, args, dim, kwargs):
 
     args, input_core_dims = _prep_data(*args, dim=dim, nd=1)
 
+    info = scipy_function_info[func]
+
+    # Simply vectorize if function does not allow axis argument
+    scipy_kwargs = kwargs.copy()
+    if info["axis_arg"]:
+        vectorize = False
+        if "axis" in scipy_kwargs.keys():
+            raise ValueError(
+                "`axis` kwarg cannot be specified as the axis/axes are specified by `dim`"
+            )
+        scipy_kwargs["axis"] = -1
+    else:
+        vectorize = True
+
     output_core_dims = [[]] * 2
     output_dtypes = ["float32"] * 2
-    kwargs = dict(scipy_func_info=scipy_function_info[func], scipy_kwargs=kwargs)
+    kwargs = dict(scipy_func_info=info, scipy_kwargs=scipy_kwargs)
     statistic, pvalue = xr.apply_ufunc(
         _wrap_scipy_func,
         *args,
@@ -96,7 +119,7 @@ def _wrap_scipy(func, args, dim, kwargs):
         input_core_dims=input_core_dims,
         output_core_dims=output_core_dims,
         output_dtypes=output_dtypes,
-        vectorize=True,
+        vectorize=vectorize,
         dask="parallelized",
     )
 
@@ -111,9 +134,10 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     Parameters
     ----------
     ds1 : xarray Dataset
-        Sample 1 data
+        Sample 1 data. Nans are automatically removed prior to executing the test
     ds2 : xarray Dataset
-        Sample 2 data. Size of two samples can be different
+        Sample 2 data. Nans are automatically removed prior to executing the test.
+        The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
@@ -151,7 +175,8 @@ def anderson_ksamp(*args, dim, kwargs={}):
     Parameters
     ----------
     args : xarray Datasets
-        The k samples of data. Sizes of samples can be different
+        The k samples of data. Nans are automatically removed prior to executing the test.
+        The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
     kwargs : dict
@@ -172,6 +197,40 @@ def anderson_ksamp(*args, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
+
+
+def ttest_ind(ds1, ds2, dim, kwargs={}):
+    """
+    Calculate the T-test for the means of two independent samples of scores.
+
+    This is a test for the null hypothesis that 2 independent samples have identical
+    average (expected) values. This test assumes that the populations have identical
+    variances by default.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.ttest_ind
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The t-statistic.
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.ttest_ind
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
 
 
 # 2-dimensional tests
