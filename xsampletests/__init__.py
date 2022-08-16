@@ -14,6 +14,7 @@ from .core import (
     ansari,
     bartlett,
     levene,
+    fligner,
 )
 
 from . import _version
