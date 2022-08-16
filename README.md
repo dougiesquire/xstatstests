@@ -24,6 +24,7 @@ Sample testing for xarray objects. Currently includes the following statistical 
 - `xsampletests.levene` : Levene test for the variances of K independent samples
 - `xsampletests.fligner` : Fligner-Killeen test for the variances of K independent samples
 - `xsampletests.median_test` : Mood test for the medians of K independent samples
+- `xsampletests.mood` : Mood test for equal distribution scale parameters from two independent samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 

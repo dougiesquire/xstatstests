@@ -6,6 +6,7 @@ import scipy.stats
 
 SAMPLE_DIM = "xsampletest_sample_dim"
 
+# Summary of how to wrap scipy.stats funcs
 # Enter outputs so that first output is the test statistic and the second
 # output is the p-value
 # n_args = -1 means no limit to the number of args
@@ -138,6 +139,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "mood": {
+        "name": "mood",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis"],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -181,8 +190,6 @@ def _prep_data(*args, dim, nd):
     return args_prepped, input_core_dims
 
 
-# 1-dimensional tests
-# -------------------
 def _wrap_scipy(func, args, dim, kwargs):
     """Generic xarray wrapper for subset of scipy stats functions"""
 
@@ -197,6 +204,7 @@ def _wrap_scipy(func, args, dim, kwargs):
             outputs = func(args, **scipy_kwargs)
         else:
             outputs = func(*args, **scipy_kwargs)
+
         return tuple(
             [getattr(outputs, g) if isinstance(g, str) else outputs[g] for g in getter]
         )
@@ -630,7 +638,7 @@ def brunnermunzel(ds1, ds2, dim, kwargs={}):
 
 def ansari(ds1, ds2, dim, kwargs={}):
     """
-    The Ansari-Bradley test for equal scale parameters.
+    The Ansari-Bradley test for equal distribution scale parameters from two independent samples.
 
     The Ansari-Bradley test is a non-parametric test for the equality of the scale parameter
     of the distributions from which two samples were drawn. The null hypothesis states that
@@ -793,8 +801,40 @@ def median_test(*args, dim, kwargs={}):
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
 
 
-# 2-dimensional tests
-# -------------------
+def mood(ds1, ds2, dim, kwargs={}):
+    """
+    The Mood test for equal distribution scale parameters from two independent samples.
+
+    Mood’s two-sample test for scale parameters is a non-parametric test for the null
+    hypothesis that two samples are drawn from the same distribution with the same scale
+    parameter.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data.
+    ds2 : xarray Dataset
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.mood
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The z-score for the hypothesis test
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.mood
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
 def ks_2samp_2d_np(x1, y1, x2, y2):
     """
     Two-dimensional Kolmogorov-Smirnov test on two samples. For now, returns only
@@ -911,7 +951,7 @@ def ks_2samp_2d(ds1, ds2, dim):
     Returns
     -------
     statistic : xarray Dataset
-        KS statistic estimating the max difference between the join distributions
+        KS statistic estimating the max difference between the joint distributions
 
     References
     ----------

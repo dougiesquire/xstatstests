@@ -425,6 +425,27 @@ def test_median_test_values(
     check_vs_scipy_func("median_test", args, kwargs)
 
 
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+def test_mood_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    alternative,
+):
+    """Check mood relative to scipy func"""
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=True, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=True, dask=False),
+    ]
+    kwargs = dict(
+        alternative=alternative,
+    )
+    check_vs_scipy_func("mood", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
@@ -439,7 +460,7 @@ def test_ks_2samp_2d_identical(samples, shape):
 
 
 @pytest.mark.parametrize(
-    "func", ["ttest_ind", "ttest_rel", "mannwhitneyu", "ranksums", "kruskal"]
+    "func", ["ttest_ind", "ttest_rel", "mannwhitneyu", "ranksums", "kruskal", "mood"]
 )
 @pytest.mark.parametrize("dask", [True, False])
 def test_disallowed_error(func, dask):
@@ -466,11 +487,14 @@ def test_dask_compute(func):
     getattr(xst, func)(*args, dim="sample")
 
 
-@pytest.mark.parametrize("func", ["ttest_rel"])
+@pytest.mark.parametrize("func", ["ttest_rel", "friedmanchisquare"])
 @pytest.mark.parametrize("dask", [True, False])
 def test_sample_size_error(func, dask):
     """Check that error is thrown when sample sizes differ for functions that don't allow this"""
-    n_per_sample = [10, 20]
+    if func == "friedmanchisquare":
+        n_per_sample = [10, 20, 30]
+    else:
+        n_per_sample = [10, 20]
     shape = (2, 3)
     args = [ds_1var((n,) + shape, dask) for n in n_per_sample]
     with pytest.raises(ValueError):

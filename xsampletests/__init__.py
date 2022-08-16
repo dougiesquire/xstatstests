@@ -16,6 +16,7 @@ from .core import (
     levene,
     fligner,
     median_test,
+    mood,
 )
 
 from . import _version
