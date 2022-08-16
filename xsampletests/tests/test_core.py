@@ -400,6 +400,31 @@ def test_fligner_values(k_samples, n_per_sample, shape, center, proportiontocut)
     check_vs_scipy_func("fligner", args, kwargs)
 
 
+@pytest.mark.parametrize("k_samples", [2, 3, 5])
+@pytest.mark.parametrize(
+    "n_per_sample", [[10, 10, 10, 10, 10], [10, 20, 30, 40, 50], [50, 40, 30, 20, 10]]
+)
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("ties", ["below", "above", "ignore"])
+@pytest.mark.parametrize("correction", [True, False])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+def test_median_test_values(
+    k_samples, n_per_sample, shape, add_nans, ties, correction, nan_policy
+):
+    """Check median_test relative to scipy func"""
+    args = [
+        ds_1var((n,) + shape, add_nans=add_nans, dask=False)
+        for n in n_per_sample[slice(k_samples)]
+    ]
+    kwargs = dict(
+        ties=ties,
+        correction=correction,
+        nan_policy=nan_policy,
+    )
+    check_vs_scipy_func("median_test", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):

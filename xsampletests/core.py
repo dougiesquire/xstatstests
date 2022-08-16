@@ -130,6 +130,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "median_test": {
+        "name": "median_test",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -745,6 +753,36 @@ def fligner(*args, dim, kwargs={}):
     statistics : xarray Dataset
         Dataset with the following variables:
         - "statistic" : The Fligner-Killeen test statistic
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.fligner
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
+
+
+def median_test(*args, dim, kwargs={}):
+    """
+    The Mood test for the medians of k independent samples.
+
+    Mood's test tests that two or more samples come from populations with the same median.
+
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. The sizes of the samples along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.median_test
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The test statistic
         - "pvalue" : The p-value
 
     See also

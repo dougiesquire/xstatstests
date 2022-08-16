@@ -15,6 +15,7 @@ from .core import (
     bartlett,
     levene,
     fligner,
+    median_test,
 )
 
 from . import _version

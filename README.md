@@ -22,7 +22,8 @@ Sample testing for xarray objects. Currently includes the following statistical 
 - `xsampletests.ansari` : Ansari-Bradley test for equal distribution scale parameters from two independent samples
 - `xsampletests.bartlett` : Bartlett test for the variances of K independent samples
 - `xsampletests.levene` : Levene test for the variances of K independent samples
-- `xsampletests.fligner` : Fligner-Killeen test for the variances of Kindependent samples
+- `xsampletests.fligner` : Fligner-Killeen test for the variances of K independent samples
+- `xsampletests.median_test` : Mood test for the medians of K independent samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 
