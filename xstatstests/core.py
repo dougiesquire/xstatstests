@@ -226,7 +226,7 @@ def _wrap_scipy(func, args, dim, kwargs):
     vectorize = True
     for kw in info["disallowed_kwargs"]:
         if kw in scipy_kwargs.keys():
-            raise ValueError(f"`{kw}` kwarg is disallowed by xsampletests")
+            raise ValueError(f"`{kw}` kwarg is disallowed by xstatstests")
         if kw == "axis":
             vectorize = False
             scipy_kwargs["axis"] = -1

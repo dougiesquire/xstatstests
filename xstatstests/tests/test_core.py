@@ -7,8 +7,8 @@ import xarray as xr
 
 import scipy.stats
 
-from xsampletests.core import scipy_function_info
-import xsampletests as xst
+from xstatstests.core import scipy_function_info
+import xstatstests as xst
 from .fixtures import ds_1var
 
 
@@ -27,7 +27,7 @@ def check_vs_scipy_func(func, args, kwargs={}):
         )
 
     def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
-        """Test wrapped xsampletests func values relative to scipy"""
+        """Test wrapped xstatstests func values relative to scipy"""
         scipy_func = getattr(scipy.stats, func_info["name"])
 
         inputs_np_1d = [

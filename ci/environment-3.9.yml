@@ -1,4 +1,4 @@
-name: xsampletests-test
+name: xstatstests-test
 channels:
   - conda-forge
 dependencies:

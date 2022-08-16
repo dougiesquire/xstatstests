@@ -2,4 +2,4 @@
 omit =
     setup.py
     versioneer.py
-    xsampletests/_version.py
+    xstatstests/_version.py

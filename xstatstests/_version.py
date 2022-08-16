@@ -42,8 +42,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = "v"
-    cfg.parentdir_prefix = "xsampletests-"
-    cfg.versionfile_source = "xsampletests/_version.py"
+    cfg.parentdir_prefix = "xstatstests-"
+    cfg.versionfile_source = "xstatstests/_version.py"
     cfg.verbose = False
     return cfg
 

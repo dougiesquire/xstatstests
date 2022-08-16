@@ -1,4 +1,4 @@
-name: xsampletests
+name: xstatstests
 channels:
   - conda-forge
   - defaults
