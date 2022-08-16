@@ -9,6 +9,7 @@ from .core import (
     mannwhitneyu,
     ranksums,
     kruskal,
+    friedmanchisquare,
 )
 
 from . import _version

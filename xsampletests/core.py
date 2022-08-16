@@ -82,6 +82,14 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis", "keepdims"],
         "outputs": [0, 1],
     },
+    "friedmanchisquare": {
+        "name": "friedmanchisquare",
+        "stack_args": False,
+        "same_sample_sizes": True,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -225,7 +233,7 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
 
 def anderson_ksamp(*args, dim, kwargs={}):
     """
-    The Anderson-Darling test for k-samples.
+    The Anderson-Darling test for k independent samples.
 
     The k-sample Anderson-Darling test is a modification of the one-sample
     Anderson-Darling test. It tests the null hypothesis that k-samples are drawn
@@ -469,7 +477,7 @@ def ranksums(ds1, ds2, dim, kwargs={}):
 
 def kruskal(*args, dim, kwargs={}):
     """
-    The Kruskal-Wallis H-test for K independent samples.
+    The Kruskal-Wallis H-test for k independent samples.
 
     The Kruskal-Wallis H-test tests the null hypothesis that the population median of all of the
     groups are equal. It is a non-parametric version of ANOVA.
@@ -491,6 +499,41 @@ def kruskal(*args, dim, kwargs={}):
         - "pvalue" : The p-value for the test using the assumption that H has a chi square
             distribution. The p-value returned is the survival function of the chi square
             distribution evaluated at H.
+
+    See also
+    --------
+    scipy.stats.kruskal
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
+
+
+def friedmanchisquare(*args, dim, kwargs={}):
+    """
+    The Friedman test for k repeated samples.
+
+    The Friedman test tests the null hypothesis that repeated samples of the same
+    individuals have the same distribution. It is often used to test for consistency
+    among samples obtained in different ways. For example, if two sampling techniques
+    are used on the same set of individuals, the Friedman test can be used to determine
+    if the two sampling techniques are consistent.
+
+    Parameters
+    ----------
+    args : xarray Datasets
+        The k samples of data. The sizes of the samples along dim can be different
+    dim : str
+        The name of the sample dimension(s) in args
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.friedmanchisquare
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The test statistic, correcting for ties.
+        - "pvalue" : The  p-value assuming that the test statistic has a chi squared
+            distribution.
 
     See also
     --------

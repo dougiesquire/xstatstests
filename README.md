@@ -17,6 +17,7 @@ Sample testing for xarray objects. Currently includes the following statistical 
 - `xsampletests.mannwhitneyu` : Mann-Whitney U rank test on two independent samples
 - `xsampletests.ranksums` : Wilcoxon rank-sum statistic on two independent samples
 - `xsampletests.kruskal` : Kruskal-Wallis H-test on K independent samples
+- `xsampletests.friedmanchisquare` : Friedman chi-squared test for K repeated samples
 
 This package was originally called `xks` but was renamed when tests additional to the KS test were added.
 

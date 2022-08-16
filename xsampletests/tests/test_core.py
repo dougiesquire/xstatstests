@@ -277,6 +277,21 @@ def test_kruskal_values(
     check_vs_scipy_func("kruskal", args, kwargs)
 
 
+@pytest.mark.parametrize("k_samples", [3, 4, 5])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+def test_friedmanchisquare_values(
+    k_samples,
+    shape,
+):
+    """Check friedmanchisquare relative to scipy func"""
+    n_per_sample = [10, 10, 10, 10, 10]
+    args = [
+        ds_1var((n,) + shape, add_nans=False, dask=False)
+        for n in n_per_sample[slice(k_samples)]
+    ]
+    check_vs_scipy_func("friedmanchisquare", args)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
@@ -290,7 +305,9 @@ def test_ks_2samp_2d_identical(samples, shape):
     npt.assert_allclose(D["statistic"].values, 0.0)
 
 
-@pytest.mark.parametrize("func", ["ttest_ind", "ttest_rel", "mannwhitneyu"])
+@pytest.mark.parametrize(
+    "func", ["ttest_ind", "ttest_rel", "mannwhitneyu", "ranksums", "kruskal"]
+)
 @pytest.mark.parametrize("dask", [True, False])
 def test_disallowed_error(func, dask):
     """Check that error is thrown when a disallowed kwarg is provided to scipy funcs"""
@@ -303,9 +320,7 @@ def test_disallowed_error(func, dask):
             getattr(xst, func)(*args, dim="sample", kwargs={kw: None})
 
 
-@pytest.mark.parametrize(
-    "func", ["ks_2samp_1d", "anderson_ksamp", "ttest_ind", "ttest_rel"]
-)
+@pytest.mark.parametrize("func", scipy_function_info.keys())
 def test_dask_compute(func):
     """Check that functions run with dask arrays and don't compute"""
     n_per_sample = [10, 10]
