@@ -37,7 +37,7 @@ This package was originally called `xks` but was renamed when tests additional t
 ### Installation
 To install this package from PyPI:
 ```
-#TODO
+pip install xsampletests
 ```
 
 ### Contributing
