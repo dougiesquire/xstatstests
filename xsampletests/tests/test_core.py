@@ -292,6 +292,35 @@ def test_friedmanchisquare_values(
     check_vs_scipy_func("friedmanchisquare", args)
 
 
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("distribution", ["t", "normal"])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+def test_brunnermunzel_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    add_nans,
+    alternative,
+    distribution,
+    nan_policy,
+):
+    """Check brunnermunzel relative to scipy func"""
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=add_nans, dask=False),
+    ]
+    kwargs = dict(
+        alternative=alternative,
+        distribution=distribution,
+        nan_policy=nan_policy,
+    )
+    check_vs_scipy_func("brunnermunzel", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
@@ -323,7 +352,11 @@ def test_disallowed_error(func, dask):
 @pytest.mark.parametrize("func", scipy_function_info.keys())
 def test_dask_compute(func):
     """Check that functions run with dask arrays and don't compute"""
-    n_per_sample = [10, 10]
+    if func == "friedmanchisquare":
+        n_samples = 3
+    else:
+        n_samples = 2
+    n_per_sample = n_samples * [10]
     shape = (2, 3)
     args = [ds_1var((n,) + shape, True) for n in n_per_sample]
     getattr(xst, func)(*args, dim="sample")

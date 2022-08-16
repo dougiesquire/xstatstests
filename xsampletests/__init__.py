@@ -10,6 +10,7 @@ from .core import (
     ranksums,
     kruskal,
     friedmanchisquare,
+    brunnermunzel,
 )
 
 from . import _version

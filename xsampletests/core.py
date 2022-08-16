@@ -90,6 +90,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "brunnermunzel": {
+        "name": "brunnermunzel",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -521,7 +529,8 @@ def friedmanchisquare(*args, dim, kwargs={}):
     Parameters
     ----------
     args : xarray Datasets
-        The k samples of data. The sizes of the samples along dim can be different
+        The k samples of data. Nans are automatically removed prior to executing the test.
+        The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
     kwargs : dict
@@ -532,7 +541,7 @@ def friedmanchisquare(*args, dim, kwargs={}):
     statistics : xarray Dataset
         Dataset with the following variables:
         - "statistic" : The test statistic, correcting for ties.
-        - "pvalue" : The  p-value assuming that the test statistic has a chi squared
+        - "pvalue" : The p-value assuming that the test statistic has a chi squared
             distribution.
 
     See also
@@ -541,6 +550,43 @@ def friedmanchisquare(*args, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
+
+
+def brunnermunzel(ds1, ds2, dim, kwargs={}):
+    """
+    The Brunner-Munzel test on two independent samples.
+
+    The Brunner-Munzel test is a nonparametric test of the null hypothesis that when values
+    are taken one by one from each group, the probabilities of getting large values in both
+    groups are equal. Unlike the Wilcoxon-Mann-Whitney’s U test, this does not require the
+    assumption of equivariance of two groups. Note that this does not assume the
+    distributions are same.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data. Nans are automatically removed prior to executing the test
+    ds2 : xarray Dataset
+        Sample 2 data. Nans are automatically removed prior to executing the test.
+        The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.brunnermunzel
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Brunner-Munzer W statistic.
+        - "pvalue" : The one-sided or two-sided p-value assuming an t distribution.
+
+    See also
+    --------
+    scipy.stats.brunnermunzel
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
 
 
 # 2-dimensional tests
