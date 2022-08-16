@@ -98,6 +98,14 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "ansari": {
+        "name": "ansari",
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -565,10 +573,9 @@ def brunnermunzel(ds1, ds2, dim, kwargs={}):
     Parameters
     ----------
     ds1 : xarray Dataset
-        Sample 1 data. Nans are automatically removed prior to executing the test
+        Sample 1 data.
     ds2 : xarray Dataset
-        Sample 2 data. Nans are automatically removed prior to executing the test.
-        The sizes of samples 1 and 2 along dim can be different
+        Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
     kwargs : dict
@@ -584,6 +591,42 @@ def brunnermunzel(ds1, ds2, dim, kwargs={}):
     See also
     --------
     scipy.stats.brunnermunzel
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def ansari(ds1, ds2, dim, kwargs={}):
+    """
+    The Ansari-Bradley test for equal scale parameters.
+
+    The Ansari-Bradley test is a non-parametric test for the equality of the scale parameter
+    of the distributions from which two samples were drawn. The null hypothesis states that
+    the ratio of the scale of the distribution underlying ds1 to the scale of the distribution
+    underlying ds2 is 1.
+
+    Parameters
+    ----------
+    ds1 : xarray Dataset
+        Sample 1 data. Nans are automatically removed prior to executing the test
+    ds2 : xarray Dataset
+        Sample 2 data. Nans are automatically removed prior to executing the test.
+        The sizes of samples 1 and 2 along dim can be different
+    dim : str
+        The name of the sample dimension(s) in ds1 and ds2
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.ansari
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Ansari-Bradley test statistic
+        - "pvalue" : The p-value
+
+    See also
+    --------
+    scipy.stats.ansari
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)

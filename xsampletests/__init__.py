@@ -11,6 +11,7 @@ from .core import (
     kruskal,
     friedmanchisquare,
     brunnermunzel,
+    ansari,
 )
 
 from . import _version

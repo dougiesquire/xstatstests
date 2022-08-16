@@ -321,6 +321,27 @@ def test_brunnermunzel_values(
     check_vs_scipy_func("brunnermunzel", args, kwargs)
 
 
+@pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
+@pytest.mark.parametrize("ds2_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+def test_ansari_values(
+    ds1_n_per_sample,
+    ds2_n_per_sample,
+    shape,
+    alternative,
+):
+    """Check ansari relative to scipy func"""
+    args = [
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=False, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    kwargs = dict(
+        alternative=alternative,
+    )
+    check_vs_scipy_func("ansari", args, kwargs)
+
+
 @pytest.mark.parametrize("samples", [10, 50])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_ks_2samp_2d_identical(samples, shape):
