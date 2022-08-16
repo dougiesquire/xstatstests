@@ -924,7 +924,7 @@ def ks_2samp_2d_np(x1, y1, x2, y2):
     ]
     assert (x1.shape[-1] == y1.shape[-1]) and (x2.shape[-1] == y2.shape[-1])
     assert (x1.shape[:-1] == x2.shape[:-1]) and (y1.shape[:-1] == y2.shape[:-1])
-    # n1, n2 = x1.shape[-1], x2.shape[-1]
+
     D1 = _maxdist(x1, y1, x2, y2)
     D2 = _maxdist(x2, y2, x1, y1)
     return (D1 + D2) / 2
@@ -968,6 +968,9 @@ def ks_2samp_2d(ds1, ds2, dim):
         ks_2samp_2d_np,
         *args,
         input_core_dims=input_core_dims,
+        output_core_dims=[[]],
+        output_dtypes=["float32"],
+        dask="parallelized",
     )
 
     return res.to_dataset(name="statistic")
