@@ -274,6 +274,12 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
         - "statistic" : The KS statistic
         - "pvalue" : One-tailed or two-tailed p-value
 
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ks_2samp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+
     See also
     --------
     scipy.stats.ks_2samp
@@ -315,9 +321,11 @@ def anderson_ksamp(*args, dim, kwargs={}):
             for the provided samples can be rejected. The value is floored / capped
             at 0.1% / 25%
 
-    See also
-    --------
-    scipy.stats.anderson_ksamp
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.anderson_ksamp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -349,9 +357,11 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
         - "statistic" : The t-statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.ttest_ind
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ttest_ind.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -382,9 +392,11 @@ def ttest_rel(ds1, ds2, dim, kwargs={}):
         - "statistic" : The t-statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.ttest_rel
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ttest_rel.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -417,9 +429,11 @@ def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
         - "statistic" : The Cramér-von Mises statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.cramervonmises_2samp
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.cramervonmises_2samp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -451,9 +465,11 @@ def epps_singleton_2samp(ds1, ds2, dim, kwargs={}):
         - "statistic" : The Epps-Singleton statistic
         - "pvalue" : The p-value based on the asymptotic chi2-distribution
 
-    See also
-    --------
-    scipy.stats.epps_singleton_2samp
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.epps_singleton_2samp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -487,9 +503,11 @@ def mannwhitneyu(ds1, ds2, dim, kwargs={}):
             statistic corresponding with sample ds2
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.mannwhitneyu
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.mannwhitneyu.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -523,9 +541,11 @@ def ranksums(ds1, ds2, dim, kwargs={}):
             the rank sum statistic is normally distributed.
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.ranksums
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ranksums.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -556,9 +576,11 @@ def kruskal(*args, dim, kwargs={}):
             distribution. The p-value returned is the survival function of the chi square
             distribution evaluated at H.
 
-    See also
-    --------
-    scipy.stats.kruskal
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.kruskal.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -592,9 +614,11 @@ def friedmanchisquare(*args, dim, kwargs={}):
         - "pvalue" : The p-value assuming that the test statistic has a chi squared
             distribution.
 
-    See also
-    --------
-    scipy.stats.kruskal
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.kruskal.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -628,9 +652,11 @@ def brunnermunzel(ds1, ds2, dim, kwargs={}):
         - "statistic" : The Brunner-Munzer W statistic.
         - "pvalue" : The one-sided or two-sided p-value assuming an t distribution.
 
-    See also
-    --------
-    scipy.stats.brunnermunzel
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.brunnermunzel.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -664,9 +690,11 @@ def ansari(ds1, ds2, dim, kwargs={}):
         - "statistic" : The Ansari-Bradley test statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.ansari
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ansari.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
@@ -697,9 +725,11 @@ def bartlett(*args, dim, kwargs={}):
         - "statistic" : The Bartlett test statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.bartlett
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.bartlett.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -730,9 +760,11 @@ def levene(*args, dim, kwargs={}):
         - "statistic" : The Levene test statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.levene
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.levene.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -763,9 +795,11 @@ def fligner(*args, dim, kwargs={}):
         - "statistic" : The Fligner-Killeen test statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.fligner
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.fligner.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -793,9 +827,11 @@ def median_test(*args, dim, kwargs={}):
         - "statistic" : The test statistic
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.fligner
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.median_test.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], args, dim, kwargs)
@@ -827,9 +863,11 @@ def mood(ds1, ds2, dim, kwargs={}):
         - "statistic" : The z-score for the hypothesis test
         - "pvalue" : The p-value
 
-    See also
-    --------
-    scipy.stats.mood
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.mood.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
