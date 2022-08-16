@@ -19,7 +19,7 @@ def empty_dask_array(shape, dtype=float, chunks=None):
     return a
 
 
-def ds_1var(shape, dask=False):
+def ds_1var(shape, add_nans=False, dask=False):
     """An example DataSet.
     The first dimension is named 'sample' and the data is identical over other dimensions
     """
@@ -32,4 +32,7 @@ def ds_1var(shape, dask=False):
             np.random.random(size=shape[0]), list(range(1, len(shape)))
         )
         data = np.tile(data, (*shape[1:],))
+    if add_nans:
+        n_nan = max(int(shape[0] / 5), 1)
+        data[np.random.choice(shape[0], n_nan, replace=False), ...] = np.nan
     return xr.DataArray(data, coords=coords, dims=dims).to_dataset(name="var")
