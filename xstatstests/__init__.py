@@ -20,6 +20,7 @@ from .scipy import (
     kurtosistest,
     normaltest,
     jarque_bera,
+    shapiro,
 )
 from .core import (
     ks_2samp_2d,

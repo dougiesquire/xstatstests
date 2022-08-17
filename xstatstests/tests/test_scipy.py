@@ -510,7 +510,7 @@ def test_normaltest_values(
     check_vs_scipy_func("normaltest", args, kwargs)
 
 
-@pytest.mark.parametrize("ds_n_per_sample", [100, 2000])
+@pytest.mark.parametrize("ds_n_per_sample", [10, 20])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
 def test_jarque_bera_values(
     ds_n_per_sample,
@@ -521,6 +521,19 @@ def test_jarque_bera_values(
         ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
     ]
     check_vs_scipy_func("jarque_bera", args)
+
+
+@pytest.mark.parametrize("ds_n_per_sample", [10, 20])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+def test_shapiro_values(
+    ds_n_per_sample,
+    shape,
+):
+    """Check shapiro relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    check_vs_scipy_func("shapiro", args)
 
 
 @pytest.mark.parametrize(
