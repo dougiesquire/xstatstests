@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/dougiesquire/xstatstests/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
-Statistical tests on xarray objects. Currently includes the following statistical tests (most are currently simple, often vectorized, wrappers of [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) functions):
+Statistical tests on xarray objects. `xstatstests` currently includes the following statistical tests (most are currently simple, often vectorized, wrappers of [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) functions):
 
 #### Distribution tests
 - `xstatstests.ks_1samp_1d` : one-dimensional Kolmogorov-Smirnov test on one sample
