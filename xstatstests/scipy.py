@@ -58,6 +58,15 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
+    "cramervonmises": {
+        "name": "cramervonmises",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": ["statistic", "pvalue"],
+    },
     "cramervonmises_2samp": {
         "name": "cramervonmises_2samp",
         "min_args": 2,
@@ -477,6 +486,49 @@ def ttest_rel(ds1, ds2, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def cramervonmises(ds, dim, kwargs={"cdf": "norm"}):
+    """
+    The Cramér-von Mises test for goodness of fit of one sample.
+
+    This performs a test of the goodness of fit of a cumulative distribution function (cdf)
+    compared to the empirical distribution function of observed random variates that are
+    assumed to be independent and identically distributed.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.cramervonmises. Must include at least the key
+        "cdf" specifying a distribution using either a string or a callable. If a string,
+        it should be the name of a distribution in scipy.stats. If a callable, that
+        callable is used to calculate the cdf: `cdf(x, *args) -> float`
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Cramér-von Mises statistic
+        - "pvalue" : The p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.cramervonmises.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    if "cdf" not in kwargs:
+        raise ValueError("'cdf' must be specified as a kwarg to cramervonmises")
+
+    if isinstance(kwargs["cdf"], str):
+        kwargs["cdf"] = _get_scipy_cdf_func(kwargs["cdf"])
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
 
 
 def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):

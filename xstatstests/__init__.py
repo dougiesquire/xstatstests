@@ -4,6 +4,7 @@ from .scipy import (
     anderson_ksamp,
     ttest_ind,
     ttest_rel,
+    cramervonmises,
     cramervonmises_2samp,
     epps_singleton_2samp,
     mannwhitneyu,
