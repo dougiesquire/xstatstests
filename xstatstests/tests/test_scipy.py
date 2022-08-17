@@ -465,6 +465,27 @@ def test_skewtest_values(
     check_vs_scipy_func("skewtest", args, kwargs)
 
 
+@pytest.mark.parametrize("ds_n_per_sample", [20, 30])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+def test_kurtosistest_values(
+    ds_n_per_sample,
+    shape,
+    nan_policy,
+    alternative,
+):
+    """Check kurtosistest relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=True, dask=False),
+    ]
+    kwargs = dict(
+        nan_policy=nan_policy,
+        alternative=alternative,
+    )
+    check_vs_scipy_func("kurtosistest", args, kwargs)
+
+
 @pytest.mark.parametrize(
     "func", ["ttest_ind", "ttest_rel", "mannwhitneyu", "ranksums", "kruskal", "mood"]
 )

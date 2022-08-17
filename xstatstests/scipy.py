@@ -175,6 +175,15 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
+    "kurtosistest": {
+        "name": "kurtosistest",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis"],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -888,6 +897,39 @@ def skewtest(ds, dim, kwargs={}):
     Notes
     -----
     This function is a simple wrapper on the scipy function scipy.stats.skewtest.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
+
+
+def kurtosistest(ds, dim, kwargs={}):
+    """
+    The Anscombe test for normal kurtosis.
+
+    This function tests the null hypothesis that the kurtosis of the population
+    from which the sample was drawn is that of the normal distribution.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data.
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.kurtosistest
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The z-score for the hypothesis test
+        - "pvalue" : The p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.kurtosistest.
     Users are recommended to read the scipy documentation prior to using this
     function.
     """
