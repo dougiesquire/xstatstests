@@ -1,4 +1,5 @@
 from .scipy import (
+    ks_1samp_1d,
     ks_2samp_1d,
     anderson_ksamp,
     ttest_ind,

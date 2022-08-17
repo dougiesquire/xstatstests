@@ -51,7 +51,6 @@ def check_vs_scipy_func(func, args, kwargs={}):
     function_info = scipy_function_info[func]
 
     # Test with a single sample dim
-
     outputs = getattr(xst, func)(*args, dim="sample", kwargs=kwargs)
     _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
 
@@ -534,6 +533,33 @@ def test_shapiro_values(
         ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
     ]
     check_vs_scipy_func("shapiro", args)
+
+
+@pytest.mark.parametrize("ds_n_per_sample", [20, 30])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("cdf", [scipy.stats.norm.cdf, scipy.stats.uniform.cdf])
+@pytest.mark.parametrize("cdf_args", [(), (0, 1), (0, 2)])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("method", ["auto", "exact", "approx", "asymp"])
+def test_ks_1samp_1d_values(
+    ds_n_per_sample,
+    shape,
+    cdf,
+    cdf_args,
+    alternative,
+    method,
+):
+    """Check ks_1samp_1d relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    kwargs = dict(
+        cdf=cdf,
+        args=cdf_args,
+        alternative=alternative,
+        method=method,
+    )
+    check_vs_scipy_func("ks_1samp_1d", args, kwargs)
 
 
 @pytest.mark.parametrize(

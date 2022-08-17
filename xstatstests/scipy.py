@@ -22,6 +22,15 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "ks_1samp_1d": {
+        "name": "ks_1samp",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
     "anderson_ksamp": {
         "name": "anderson_ksamp",
         "min_args": 2,
@@ -304,10 +313,6 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     Users are recommended to read the scipy documentation prior to using this
     function.
 
-    See also
-    --------
-    scipy.stats.ks_2samp
-
     References
     ----------
     Hodges, J.L. Jr., “The Significance Probability of the Smirnov Two-Sample Test,”
@@ -315,6 +320,42 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def ks_1samp_1d(ds, dim, kwargs={"cdf": scipy.stats.norm.cdf}):
+    """
+    The one-dimensional Kolmogorov-Smirnov test comparing a sample to a specified
+    continuous distribution (normal by default).
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict
+        Any kwargs to pass to scipy.stats.ks_1samp. Must include at least the
+        key "cdf" specifying a callable used to calculate the cdf (e.g.
+        scipy.stats.norm.cdf)
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The KS statistic
+        - "pvalue" : One-tailed or two-tailed p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ks_1samp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    if "cdf" not in kwargs:
+        raise ValueError("'cdf' must be specified as a kwarg")
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
 
 
 def anderson_ksamp(*args, dim, kwargs={}):
