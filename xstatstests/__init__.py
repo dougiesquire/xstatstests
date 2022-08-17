@@ -18,6 +18,7 @@ from .scipy import (
     mood,
     skewtest,
     kurtosistest,
+    normaltest,
 )
 from .core import (
     ks_2samp_2d,

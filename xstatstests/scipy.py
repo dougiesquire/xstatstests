@@ -184,6 +184,15 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
+    "normaltest": {
+        "name": "normaltest",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": False,
+        "disallowed_kwargs": ["axis"],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -899,6 +908,12 @@ def skewtest(ds, dim, kwargs={}):
     This function is a simple wrapper on the scipy function scipy.stats.skewtest.
     Users are recommended to read the scipy documentation prior to using this
     function.
+
+    References
+    ----------
+    - R. B. D’Agostino, A. J. Belanger and R. B. D’Agostino Jr., “A suggestion for
+        using powerful and informative tests of normality”, American Statistician
+        44, pp. 316-321, 1990.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
@@ -932,6 +947,53 @@ def kurtosistest(ds, dim, kwargs={}):
     This function is a simple wrapper on the scipy function scipy.stats.kurtosistest.
     Users are recommended to read the scipy documentation prior to using this
     function.
+
+    References
+    ----------
+    - F. J. Anscombe, W. J. Glynn, “Distribution of the kurtosis statistic b2 for
+        normal samples”, Biometrika, vol. 70, pp. 227-234, 1983.
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
+
+
+def normaltest(ds, dim, kwargs={}):
+    """
+    The D’Agostino/Pearson test for whether a sample differs from a normal distribution.
+
+    This function tests the null hypothesis that a sample comes from a normal
+    distribution. It is based on D’Agostino and Pearson’s test that combines skew and
+    kurtosis to produce an omnibus test of normality.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data.
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.normaltest
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : s^2 + k^2, where s is the z-score returned by xstatstests.skewtest
+            and k is the z-score returned by xstatstests.kurtosistest.
+        - "pvalue" : The 2-sided chi squared p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.normaltest.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+
+    References
+    ----------
+    - D’Agostino, R. B. (1971), “An omnibus test of normality for moderate and large sample
+        size”, Biometrika, 58, 341-348
+    - D’Agostino, R. and Pearson, E. S. (1973), “Tests for departure from normality”,
+        Biometrika, 60, 613-622
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
