@@ -193,6 +193,15 @@ scipy_function_info = {
         "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
     },
+    "jarque_bera": {
+        "name": "jarque_bera",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -881,7 +890,7 @@ def mood(ds1, ds2, dim, kwargs={}):
 
 def skewtest(ds, dim, kwargs={}):
     """
-    The D’Agostino test for normal skewness.
+    The D’Agostino test for normal sample skewness.
 
     This function tests the null hypothesis that the skewness of the population
     that the sample was drawn from is the same as that of a corresponding normal
@@ -921,7 +930,7 @@ def skewtest(ds, dim, kwargs={}):
 
 def kurtosistest(ds, dim, kwargs={}):
     """
-    The Anscombe test for normal kurtosis.
+    The Anscombe test for normal sample kurtosis.
 
     This function tests the null hypothesis that the kurtosis of the population
     from which the sample was drawn is that of the normal distribution.
@@ -962,7 +971,7 @@ def normaltest(ds, dim, kwargs={}):
     The D’Agostino/Pearson test for whether a sample differs from a normal distribution.
 
     This function tests the null hypothesis that a sample comes from a normal
-    distribution. It is based on D’Agostino and Pearson’s test that combines skew and
+    distribution. It is based on D’Agostino and Pearson’s test that combines skewness and
     kurtosis to produce an omnibus test of normality.
 
     Parameters
@@ -994,6 +1003,41 @@ def normaltest(ds, dim, kwargs={}):
         size”, Biometrika, 58, 341-348
     - D’Agostino, R. and Pearson, E. S. (1973), “Tests for departure from normality”,
         Biometrika, 60, 613-622
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
+
+
+def jarque_bera(ds, dim, kwargs={}):
+    """
+    The Jarque-Bera goodness of fit test on sample data.
+
+    The Jarque-Bera test tests whether the sample data has the skewness and kurtosis matching
+    a normal distribution. Note that this test only works for a large enough number of data
+    samples (>2000) as the test statistic asymptotically has a Chi-squared distribution with 2
+    degrees of freedom.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test.
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.jarque_bera
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Jarque-Bera test statistic
+        - "pvalue" : The p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.jarque_bera.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)

@@ -19,6 +19,7 @@ from .scipy import (
     skewtest,
     kurtosistest,
     normaltest,
+    jarque_bera,
 )
 from .core import (
     ks_2samp_2d,

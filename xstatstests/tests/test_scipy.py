@@ -435,8 +435,8 @@ def test_mood_values(
 ):
     """Check mood relative to scipy func"""
     args = [
-        ds_1var((ds1_n_per_sample,) + shape, add_nans=True, dask=False),
-        ds_1var((ds2_n_per_sample,) + shape, add_nans=True, dask=False),
+        ds_1var((ds1_n_per_sample,) + shape, add_nans=False, dask=False),
+        ds_1var((ds2_n_per_sample,) + shape, add_nans=False, dask=False),
     ]
     kwargs = dict(
         alternative=alternative,
@@ -446,17 +446,19 @@ def test_mood_values(
 
 @pytest.mark.parametrize("ds_n_per_sample", [10, 30])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
 @pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
 @pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
 def test_skewtest_values(
     ds_n_per_sample,
     shape,
+    add_nans,
     nan_policy,
     alternative,
 ):
     """Check skewtest relative to scipy func"""
     args = [
-        ds_1var((ds_n_per_sample,) + shape, add_nans=True, dask=False),
+        ds_1var((ds_n_per_sample,) + shape, add_nans=add_nans, dask=False),
     ]
     kwargs = dict(
         nan_policy=nan_policy,
@@ -467,17 +469,19 @@ def test_skewtest_values(
 
 @pytest.mark.parametrize("ds_n_per_sample", [20, 30])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
 @pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
 @pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
 def test_kurtosistest_values(
     ds_n_per_sample,
     shape,
+    add_nans,
     nan_policy,
     alternative,
 ):
     """Check kurtosistest relative to scipy func"""
     args = [
-        ds_1var((ds_n_per_sample,) + shape, add_nans=True, dask=False),
+        ds_1var((ds_n_per_sample,) + shape, add_nans=add_nans, dask=False),
     ]
     kwargs = dict(
         nan_policy=nan_policy,
@@ -488,20 +492,35 @@ def test_kurtosistest_values(
 
 @pytest.mark.parametrize("ds_n_per_sample", [20, 30])
 @pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize("add_nans", [True, False])
 @pytest.mark.parametrize("nan_policy", ["propagate", "omit"])
 def test_normaltest_values(
     ds_n_per_sample,
     shape,
+    add_nans,
     nan_policy,
 ):
     """Check normaltest relative to scipy func"""
     args = [
-        ds_1var((ds_n_per_sample,) + shape, add_nans=True, dask=False),
+        ds_1var((ds_n_per_sample,) + shape, add_nans=add_nans, dask=False),
     ]
     kwargs = dict(
         nan_policy=nan_policy,
     )
     check_vs_scipy_func("normaltest", args, kwargs)
+
+
+@pytest.mark.parametrize("ds_n_per_sample", [100, 2000])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+def test_jarque_bera_values(
+    ds_n_per_sample,
+    shape,
+):
+    """Check jarque_bera relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    check_vs_scipy_func("jarque_bera", args)
 
 
 @pytest.mark.parametrize(

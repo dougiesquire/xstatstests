@@ -27,10 +27,10 @@ Statistical tests on xarray objects. Currently includes the following statistica
 - `xstatstests.median_test` : Mood test for the medians of K independent samples
 
 #### Normality tests
-- `xstatstests.skewtest` : D’Agostino test for normal skewness
-- `xstatstests.kurtosistest` : Anscombe test for normal kurtosis
-- `xstatstests.normaltest`: D’Agostino/Pearson test for whether a sample differs from a normal distribution
-
+- `xstatstests.skewtest` : D’Agostino test for normal sample skewness
+- `xstatstests.kurtosistest` : Anscombe test for normal sample kurtosis
+- `xstatstests.normaltest`: D’Agostino/Pearson test for normal sample skewness and kurtosis
+- `xstatstests.jarque_bera` : Jarque-Bera test for normal sample skewness and kurtosis
 
 #### Other tests
 - `xstatstests.mannwhitneyu` : Mann-Whitney U rank test on two independent samples
