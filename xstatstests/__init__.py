@@ -1,6 +1,5 @@
-from .core import (
+from .scipy import (
     ks_2samp_1d,
-    ks_2samp_2d,
     anderson_ksamp,
     ttest_ind,
     ttest_rel,
@@ -17,6 +16,10 @@ from .core import (
     fligner,
     median_test,
     mood,
+    skewtest,
+)
+from .core import (
+    ks_2samp_2d,
 )
 
 from . import _version
