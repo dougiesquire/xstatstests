@@ -1,8 +1,10 @@
 from .scipy import (
+    ks_1samp_1d,
     ks_2samp_1d,
     anderson_ksamp,
     ttest_ind,
     ttest_rel,
+    cramervonmises,
     cramervonmises_2samp,
     epps_singleton_2samp,
     mannwhitneyu,

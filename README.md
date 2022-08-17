@@ -10,9 +10,11 @@
 Statistical tests on xarray objects. Currently includes the following statistical tests (most are currently simple, often vectorized, wrappers of [`scipy.stats`](https://docs.scipy.org/doc/scipy/reference/stats.html) functions):
 
 #### Distribution tests
-- `xstatstests.ks_2samp_1d`: one-dimensional Kolmogorov-Smirnov test on two independent samples
-- `xstatstests.ks_2samp_2d`: two-dimensional Kolmogorov-Smirnov test on two independent samples
+- `xstatstests.ks_1samp_1d` : one-dimensional Kolmogorov-Smirnov test on one sample
+- `xstatstests.ks_2samp_1d` : one-dimensional Kolmogorov-Smirnov test on two independent samples
+- `xstatstests.ks_2samp_2d` : two-dimensional Kolmogorov-Smirnov test on two independent samples
 - `xstatstests.anderson_ksamp`: Anderson-Darling test on K independent samples
+- `xstatstests.cramervonmises` : Cramér-von Mises test on one sample
 - `xstatstests.cramervonmises_2samp` : Cramér-von Mises test on two independent samples
 - `xstatstests.epps_singleton_2samp` : Epps-Singleton test on two independent samples
 - `xstatstests.ansari` : Ansari-Bradley test for equal distribution scale parameters from two independent samples

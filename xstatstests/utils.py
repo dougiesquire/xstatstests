@@ -4,7 +4,7 @@ SAMPLE_DIM = "xsampletest_sample_dim"
 
 
 def _prep_data(*args, dim, nd):
-    """Prepare data for 2D tests"""
+    """Prepare data for tests"""
     if isinstance(dim, str):
         dim = [dim]
 

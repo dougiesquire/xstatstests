@@ -51,7 +51,6 @@ def check_vs_scipy_func(func, args, kwargs={}):
     function_info = scipy_function_info[func]
 
     # Test with a single sample dim
-
     outputs = getattr(xst, func)(*args, dim="sample", kwargs=kwargs)
     _test_vs_scipy_values(args, outputs, function_info, kwargs=kwargs)
 
@@ -61,6 +60,35 @@ def check_vs_scipy_func(func, args, kwargs={}):
         *args_stack, dim=["sample_1", "sample_2"], kwargs=kwargs
     )
     _test_vs_scipy_values(args, outputs_stack, function_info, kwargs=kwargs)
+
+
+@pytest.mark.parametrize("ds_n_per_sample", [20, 30])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize(
+    "cdf", ["norm", "uniform", scipy.stats.norm.cdf, scipy.stats.uniform.cdf]
+)
+@pytest.mark.parametrize("cdf_args", [(), (0, 1), (0, 2)])
+@pytest.mark.parametrize("alternative", ["two-sided", "less", "greater"])
+@pytest.mark.parametrize("method", ["auto", "exact", "approx", "asymp"])
+def test_ks_1samp_1d_values(
+    ds_n_per_sample,
+    shape,
+    cdf,
+    cdf_args,
+    alternative,
+    method,
+):
+    """Check ks_1samp_1d relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    kwargs = dict(
+        cdf=cdf,
+        args=cdf_args,
+        alternative=alternative,
+        method=method,
+    )
+    check_vs_scipy_func("ks_1samp_1d", args, kwargs)
 
 
 @pytest.mark.parametrize("ds1_n_per_sample", [10, 30])
@@ -160,6 +188,29 @@ def test_ttest_rel_values(
         alternative=alternative,
     )
     check_vs_scipy_func("ttest_rel", args, kwargs)
+
+
+@pytest.mark.parametrize("ds_n_per_sample", [20, 30])
+@pytest.mark.parametrize("shape", [(), (2,), (2, 3)])
+@pytest.mark.parametrize(
+    "cdf", ["norm", "uniform", scipy.stats.norm.cdf, scipy.stats.uniform.cdf]
+)
+@pytest.mark.parametrize("cdf_args", [(), (0, 1), (0, 2)])
+def test_cramervonmises_values(
+    ds_n_per_sample,
+    shape,
+    cdf,
+    cdf_args,
+):
+    """Check cramervonmises relative to scipy func"""
+    args = [
+        ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
+    ]
+    kwargs = dict(
+        cdf=cdf,
+        args=cdf_args,
+    )
+    check_vs_scipy_func("cramervonmises", args, kwargs)
 
 
 @pytest.mark.parametrize("ds1_n_per_sample", [2, 30])
@@ -534,6 +585,15 @@ def test_shapiro_values(
         ds_1var((ds_n_per_sample,) + shape, add_nans=False, dask=False),
     ]
     check_vs_scipy_func("shapiro", args)
+
+
+@pytest.mark.parametrize("func", ["ks_1samp_1d", "cramervonmises"])
+@pytest.mark.parametrize("kwargs", [{}, {"cdf": "nonsense"}])
+def test_wrong_cdf(func, kwargs):
+    """Test that Exception is thrown when the cdf kwarg is wrong"""
+    ds = ds_1var((10,) + (), add_nans=False, dask=False)
+    with pytest.raises(Exception):
+        getattr(xst, func)(ds, dim="sample", kwargs=kwargs)
 
 
 @pytest.mark.parametrize(

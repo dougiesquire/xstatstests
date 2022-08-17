@@ -22,6 +22,15 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "ks_1samp_1d": {
+        "name": "ks_1samp",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
     "anderson_ksamp": {
         "name": "anderson_ksamp",
         "min_args": 2,
@@ -48,6 +57,15 @@ scipy_function_info = {
         "remove_nans": False,
         "disallowed_kwargs": ["axis"],
         "outputs": [0, 1],
+    },
+    "cramervonmises": {
+        "name": "cramervonmises",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": ["statistic", "pvalue"],
     },
     "cramervonmises_2samp": {
         "name": "cramervonmises_2samp",
@@ -272,6 +290,54 @@ def _wrap_scipy(func, args, dim, kwargs):
     return xr.merge([statistic.rename("statistic"), pvalue.rename("pvalue")])
 
 
+def _get_scipy_cdf_func(name):
+    """Get scipy.stats cdf function for a specified distribution"""
+    try:
+        return getattr(scipy.stats, name).cdf
+    except AttributeError:
+        raise AttributeError(f"{name} is not an available distribution in scipy.stats")
+
+
+def ks_1samp_1d(ds, dim, kwargs={"cdf": "norm"}):
+    """
+    The one-dimensional Kolmogorov-Smirnov test comparing a sample to a specified
+    continuous distribution (normal by default).
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ks_1samp. Must include at least the key "cdf"
+        specifying a distribution using either a string or a callable. If a string, it
+        should be the name of a distribution in scipy.stats. If a callable, that callable
+        is used to calculate the cdf: `cdf(x, *args) -> float`
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The KS statistic
+        - "pvalue" : One-tailed or two-tailed p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.ks_1samp.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    if "cdf" not in kwargs:
+        raise ValueError("'cdf' must be specified as a kwarg to ks_1samp_1d")
+
+    if isinstance(kwargs["cdf"], str):
+        kwargs["cdf"] = _get_scipy_cdf_func(kwargs["cdf"])
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
+
+
 def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     """
     The one-dimensional Kolmogorov-Smirnov test on two samples.
@@ -288,8 +354,8 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
         The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ks_2samp
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ks_2samp
 
     Returns
     -------
@@ -303,10 +369,6 @@ def ks_2samp_1d(ds1, ds2, dim, kwargs={}):
     This function is a simple wrapper on the scipy function scipy.stats.ks_2samp.
     Users are recommended to read the scipy documentation prior to using this
     function.
-
-    See also
-    --------
-    scipy.stats.ks_2samp
 
     References
     ----------
@@ -333,8 +395,8 @@ def anderson_ksamp(*args, dim, kwargs={}):
         The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ad_ksamp
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ad_ksamp
 
     Returns
     -------
@@ -371,8 +433,8 @@ def ttest_ind(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ttest_ind
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ttest_ind
 
     Returns
     -------
@@ -406,8 +468,8 @@ def ttest_rel(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim must be the same
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ttest_rel
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ttest_rel
 
     Returns
     -------
@@ -424,6 +486,49 @@ def ttest_rel(ds1, ds2, dim, kwargs={}):
     """
 
     return _wrap_scipy(inspect.stack()[0][3], [ds1, ds2], dim, kwargs)
+
+
+def cramervonmises(ds, dim, kwargs={"cdf": "norm"}):
+    """
+    The Cramér-von Mises test for goodness of fit of one sample.
+
+    This performs a test of the goodness of fit of a cumulative distribution function (cdf)
+    compared to the empirical distribution function of observed random variates that are
+    assumed to be independent and identically distributed.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.cramervonmises. Must include at least the key
+        "cdf" specifying a distribution using either a string or a callable. If a string,
+        it should be the name of a distribution in scipy.stats. If a callable, that
+        callable is used to calculate the cdf: `cdf(x, *args) -> float`
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Cramér-von Mises statistic
+        - "pvalue" : The p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.cramervonmises.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    if "cdf" not in kwargs:
+        raise ValueError("'cdf' must be specified as a kwarg to cramervonmises")
+
+    if isinstance(kwargs["cdf"], str):
+        kwargs["cdf"] = _get_scipy_cdf_func(kwargs["cdf"])
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
 
 
 def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
@@ -443,8 +548,8 @@ def cramervonmises_2samp(ds1, ds2, dim, kwargs={}):
         The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.cramervonmises_2samp
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.cramervonmises_2samp
 
     Returns
     -------
@@ -479,8 +584,8 @@ def epps_singleton_2samp(ds1, ds2, dim, kwargs={}):
         The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.epps_singleton_2samp
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.epps_singleton_2samp
 
     Returns
     -------
@@ -515,8 +620,8 @@ def mannwhitneyu(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.mannwhitneyu
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.mannwhitneyu
 
     Returns
     -------
@@ -554,8 +659,8 @@ def ranksums(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ranksums
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ranksums
 
     Returns
     -------
@@ -588,8 +693,8 @@ def kruskal(*args, dim, kwargs={}):
         The k samples of data. The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.kruskal
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.kruskal
 
     Returns
     -------
@@ -627,8 +732,8 @@ def friedmanchisquare(*args, dim, kwargs={}):
         The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.friedmanchisquare
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.friedmanchisquare
 
     Returns
     -------
@@ -666,8 +771,8 @@ def brunnermunzel(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.brunnermunzel
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.brunnermunzel
 
     Returns
     -------
@@ -704,8 +809,8 @@ def ansari(ds1, ds2, dim, kwargs={}):
         The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.ansari
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.ansari
 
     Returns
     -------
@@ -739,8 +844,8 @@ def bartlett(*args, dim, kwargs={}):
         The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.bartlett
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.bartlett
 
     Returns
     -------
@@ -774,8 +879,8 @@ def levene(*args, dim, kwargs={}):
         The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.levene
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.levene
 
     Returns
     -------
@@ -809,8 +914,8 @@ def fligner(*args, dim, kwargs={}):
         The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.fligner
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.fligner
 
     Returns
     -------
@@ -841,8 +946,8 @@ def median_test(*args, dim, kwargs={}):
         The k samples of data. The sizes of the samples along dim can be different
     dim : str
         The name of the sample dimension(s) in args
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.median_test
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.median_test
 
     Returns
     -------
@@ -877,8 +982,8 @@ def mood(ds1, ds2, dim, kwargs={}):
         Sample 2 data. The sizes of samples 1 and 2 along dim can be different
     dim : str
         The name of the sample dimension(s) in ds1 and ds2
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.mood
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.mood
 
     Returns
     -------
@@ -911,8 +1016,8 @@ def skewtest(ds, dim, kwargs={}):
         Sample data.
     dim : str
         The name of the sample dimension(s) in ds
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.skewtest
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.skewtest
 
     Returns
     -------
@@ -950,8 +1055,8 @@ def kurtosistest(ds, dim, kwargs={}):
         Sample data.
     dim : str
         The name of the sample dimension(s) in ds
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.kurtosistest
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.kurtosistest
 
     Returns
     -------
@@ -989,8 +1094,8 @@ def normaltest(ds, dim, kwargs={}):
         Sample data.
     dim : str
         The name of the sample dimension(s) in ds
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.normaltest
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.normaltest
 
     Returns
     -------
@@ -1032,8 +1137,8 @@ def jarque_bera(ds, dim, kwargs={}):
         Sample data. Nans are automatically removed prior to executing the test.
     dim : str
         The name of the sample dimension(s) in ds
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.jarque_bera
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.jarque_bera
 
     Returns
     -------
@@ -1065,8 +1170,8 @@ def shapiro(ds, dim, kwargs={}):
         Sample data. Nans are automatically removed prior to executing the test.
     dim : str
         The name of the sample dimension(s) in ds
-    kwargs : dict
-        Any other kwargs to pass to scipy.stats.shapiro
+    kwargs : dict, optional
+        Any kwargs to pass to scipy.stats.shapiro
 
     Returns
     -------
