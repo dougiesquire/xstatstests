@@ -31,6 +31,7 @@ Statistical tests on xarray objects. Currently includes the following statistica
 - `xstatstests.kurtosistest` : Anscombe test for normal sample kurtosis
 - `xstatstests.normaltest`: D’Agostino/Pearson test for normal sample skewness and kurtosis
 - `xstatstests.jarque_bera` : Jarque-Bera test for normal sample skewness and kurtosis
+- `xstatstests.shapiro` : Shapiro-Wilk test for normality
 
 #### Other tests
 - `xstatstests.mannwhitneyu` : Mann-Whitney U rank test on two independent samples

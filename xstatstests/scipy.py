@@ -202,6 +202,15 @@ scipy_function_info = {
         "disallowed_kwargs": [],
         "outputs": [0, 1],
     },
+    "shapiro": {
+        "name": "shapiro",
+        "min_args": 1,
+        "stack_args": False,
+        "same_sample_sizes": False,
+        "remove_nans": True,
+        "disallowed_kwargs": [],
+        "outputs": [0, 1],
+    },
 }
 
 
@@ -1036,6 +1045,39 @@ def jarque_bera(ds, dim, kwargs={}):
     Notes
     -----
     This function is a simple wrapper on the scipy function scipy.stats.jarque_bera.
+    Users are recommended to read the scipy documentation prior to using this
+    function.
+    """
+
+    return _wrap_scipy(inspect.stack()[0][3], [ds], dim, kwargs)
+
+
+def shapiro(ds, dim, kwargs={}):
+    """
+    The Shapiro-Wilk test for normality.
+
+    The Shapiro-Wilk test tests the null hypothesis that the data was drawn from a
+    normal distribution.
+
+    Parameters
+    ----------
+    ds : xarray Dataset
+        Sample data. Nans are automatically removed prior to executing the test.
+    dim : str
+        The name of the sample dimension(s) in ds
+    kwargs : dict
+        Any other kwargs to pass to scipy.stats.shapiro
+
+    Returns
+    -------
+    statistics : xarray Dataset
+        Dataset with the following variables:
+        - "statistic" : The Shapiro-Wilk test statistic
+        - "pvalue" : The p-value
+
+    Notes
+    -----
+    This function is a simple wrapper on the scipy function scipy.stats.shapiro.
     Users are recommended to read the scipy documentation prior to using this
     function.
     """
