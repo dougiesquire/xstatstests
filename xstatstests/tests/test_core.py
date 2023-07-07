@@ -1,10 +1,9 @@
-import pytest
-
 import numpy.testing as npt
-
+import pytest
 import xarray as xr
 
 import xstatstests as xst
+
 from .fixtures import ds_1var
 
 

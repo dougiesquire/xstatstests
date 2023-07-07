@@ -2,12 +2,13 @@ name: xstatstests-test
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python=3.11
   - xarray
   - scipy>=1.8.0
   - numpy
   - dask-core
   - pytest
+  - pre-commit
   - pip
   - pip:
     - codecov

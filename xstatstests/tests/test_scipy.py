@@ -1,12 +1,11 @@
-import pytest
-
 import numpy as np
 import numpy.testing as npt
-
+import pytest
 import scipy.stats
 
 import xstatstests as xst
 from xstatstests.scipy import scipy_function_info
+
 from .fixtures import ds_1var
 
 

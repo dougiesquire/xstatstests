@@ -1,14 +1,15 @@
-name: xstatstests
+name: xstatstests-test
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.10
   - xarray
+  - scipy>=1.8.0
   - numpy
-  - scipy
+  - dask-core
+  - pytest
+  - pre-commit
   - pip
   - pip:
-    - pytest
+    - codecov
     - pytest-cov
-    - pre-commit
