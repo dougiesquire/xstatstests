@@ -17,8 +17,8 @@ $ git checkout -b YOUR-BUGFIX-FEATURE-BRANCH-NAME master
 3. Install `xstatstests`'s dependencies into a new conda environment:
 
 ```
-$ conda env create -f environment.yml
-$ conda activate xstatstests
+$ conda env create -f ci/environment-3.11.yml
+$ conda activate xstatstests-test
 ```
 
 Aside: it is handy to install your conda environment as an ipykernel. This makes a kernel with the `xstatstests` environment available from within Jupyter and you won't have to restart Jupyter to effectuate any changes/updates you make to the environment (simply restarting the kernel will do):

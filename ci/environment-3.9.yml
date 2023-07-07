@@ -8,6 +8,7 @@ dependencies:
   - numpy
   - dask-core
   - pytest
+  - pre-commit
   - pip
   - pip:
     - codecov

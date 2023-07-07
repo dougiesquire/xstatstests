@@ -1,8 +1,7 @@
-import numpy as np
-import xarray as xr
-
 import dask
 import dask.array as dsa
+import numpy as np
+import xarray as xr
 
 
 def empty_dask_array(shape, dtype=float, chunks=None):

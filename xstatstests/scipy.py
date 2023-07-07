@@ -1,11 +1,10 @@
 import inspect
 
 import numpy as np
-import xarray as xr
 import scipy.stats
+import xarray as xr
 
 from .utils import _prep_data
-
 
 # Summary of how to wrap scipy.stats funcs
 # min_args is used only in test_scipy.py
