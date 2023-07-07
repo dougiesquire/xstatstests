@@ -1,4 +1,4 @@
-name: CI
+name: Test
 
 on: [pull_request, push, workflow_dispatch]
 
@@ -28,7 +28,7 @@ jobs:
           miniconda-version: "latest"
           python-version: ${{ matrix.python-version }}
           environment-file: ci/environment-${{ matrix.python-version }}.yml
-          activate-environment: xstatstest-test
+          activate-environment: xstatstests-test
           auto-activate-base: false
 
       - name: Install source
