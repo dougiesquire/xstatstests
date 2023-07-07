@@ -1,5 +1,5 @@
 [project]
-name = "xstatstest"
+name = "xstatstests"
 authors = [
     { name = "Dougie Squire" },
 ]
@@ -29,10 +29,10 @@ requires = [
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
-versionfile_source = "xstatstest/_version.py"
-versionfile_build = "xstatstest/_version.py"
+versionfile_source = "xstatstests/_version.py"
+versionfile_build = "xstatstests/_version.py"
 tag_prefix = "v"
-parentdir_prefix = "xstatstest-"
+parentdir_prefix = "xstatstests-"
 
 [tool.pytest.ini_options]
 addopts = "--cov=./ --cov-report=xml"
@@ -41,7 +41,7 @@ addopts = "--cov=./ --cov-report=xml"
 omit = [
     "setup.py",
     "versioneer.py",
-    "xstatstest/_version.py",
+    "xstatstests/_version.py",
 ]
 
 [tool.ruff]
@@ -89,4 +89,4 @@ select = [
 max-complexity = 18
 
 [tool.ruff.isort]
-known-first-party = ["xstatstest"]
+known-first-party = ["xstatstests"]
