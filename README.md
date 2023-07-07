@@ -1,8 +1,8 @@
 ## xstatstests
 
 [![PyPI](https://img.shields.io/pypi/v/xstatstests)](https://pypi.org/project/xstatstests)
-[![tests](https://github.com/dougiesquire/xstatstests/actions/workflows/tests.yml/badge.svg)](https://github.com/dougiesquire/xstatstests/actions/workflows/tests.yml)
-[![pre-commit](https://github.com/dougiesquire/xstatstests/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dougiesquire/xstatstests/actions/workflows/pre-commit.yml)
+[![tests](https://github.com/dougiesquire/xstatstests/actions/workflows/test.yml/badge.svg)](https://github.com/dougiesquire/xstatstests/actions/workflows/test.yml)
+[![build](https://github.com/dougiesquire/xstatstests/actions/workflows/build.yml/badge.svg)](https://github.com/dougiesquire/xstatstests/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/dougiesquire/xstatstests/branch/main/graph/badge.svg?token=DBGC0FIRLA)](https://codecov.io/gh/dougiesquire/xstatstests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/dougiesquire/xstatstests/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
