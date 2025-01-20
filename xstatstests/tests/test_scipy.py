@@ -17,10 +17,10 @@ def check_vs_scipy_func(func, args, kwargs={}):
         new_length = int(ds.sizes["sample"] / 2)
         return (
             ds.assign_coords(sample_1=range(2), sample_2=range(new_length))
-            .stack(dim=["sample_1", "sample_2"])
+            .stack(stack_dim=("sample_1", "sample_2"))
             .reset_index("sample", drop=True)
-            .rename(sample="dim")
-            .unstack("dim")
+            .rename(sample="stack_dim")
+            .unstack("stack_dim")
         )
 
     def _test_vs_scipy_values(inputs, outputs, func_info, kwargs={}):
